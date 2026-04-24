@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no,maximum-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Hotel Journal" />
+<meta name="theme-color" content="#F9F8F6" />
+<meta name="format-detection" content="telephone=no" />
+
+<!-- App icon: inline SVG, auto-masked to rounded square by iOS -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22%231F1C19%22%2F%3E%3Crect%20x%3D%2256%22%20y%3D%2256%22%20width%3D%22400%22%20height%3D%22400%22%20fill%3D%22none%22%20stroke%3D%22%23B8965A%22%20stroke-width%3D%222%22%2F%3E%3Cg%20fill%3D%22%23E8C88A%22%3E%3Crect%20x%3D%22160%22%20y%3D%22150%22%20width%3D%2224%22%20height%3D%22212%22%2F%3E%3Crect%20x%3D%22328%22%20y%3D%22150%22%20width%3D%2224%22%20height%3D%22212%22%2F%3E%3Crect%20x%3D%22160%22%20y%3D%22244%22%20width%3D%22192%22%20height%3D%2224%22%2F%3E%3Crect%20x%3D%22144%22%20y%3D%22150%22%20width%3D%2256%22%20height%3D%228%22%2F%3E%3Crect%20x%3D%22144%22%20y%3D%22354%22%20width%3D%2256%22%20height%3D%228%22%2F%3E%3Crect%20x%3D%22312%22%20y%3D%22150%22%20width%3D%2256%22%20height%3D%228%22%2F%3E%3Crect%20x%3D%22312%22%20y%3D%22354%22%20width%3D%2256%22%20height%3D%228%22%2F%3E%3C%2Fg%3E%3Ctext%20x%3D%22256%22%20y%3D%22420%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2224%22%20letter-spacing%3D%224%22%20fill%3D%22%23B8965A%22%3EJOURNAL%3C%2Ftext%3E%3C%2Fsvg%3E" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22%231F1C19%22%2F%3E%3Cg%20fill%3D%22%23E8C88A%22%3E%3Crect%20x%3D%22160%22%20y%3D%22150%22%20width%3D%2224%22%20height%3D%22212%22%2F%3E%3Crect%20x%3D%22328%22%20y%3D%22150%22%20width%3D%2224%22%20height%3D%22212%22%2F%3E%3Crect%20x%3D%22160%22%20y%3D%22244%22%20width%3D%22192%22%20height%3D%2224%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
+
+<!-- PWA manifest inline (iOS uses apple-touch-icon above for home-screen icon) -->
+<link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"Hotel%20Journal","short_name":"Hotels","start_url":".","display":"standalone","background_color":"%23F9F8F6","theme_color":"%23F9F8F6"}' />
+
+<title>Hotel Journal</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ---------- Tokens (Luxury / Editorial) ---------- */
+  :root {
+    --bg: #F9F8F6;              /* Warm Alabaster */
+    --surface-muted: #EBE5DE;   /* Pale Taupe */
+    --ink: #1F1C19;             /* Near-black warm */
+    --ink-soft: #2B2825;
+    --muted-fg: #6C6863;        /* Warm Grey */
+    --hairline: #D9D2C8;
+    --hairline-soft: #E4DED4;
+    --gold: #B8965A;
+    --gold-soft: #C4A572;
+    --gold-ink: #8A6D3D;
+    --accent-fg: #FFFFFF;
+    --danger: #8B3A2B;
+    --success: #4F6B4A;
+
+    --serif: "Cormorant Garamond", "Hoefler Text", "Didot", Georgia, serif;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", system-ui, sans-serif;
+
+    --shadow-sm: 0 1px 2px rgba(31,28,25,0.04), 0 2px 8px rgba(31,28,25,0.03);
+    --shadow-md: 0 6px 24px rgba(31,28,25,0.06), 0 2px 8px rgba(31,28,25,0.04);
+    --shadow-lg: 0 24px 56px rgba(31,28,25,0.14), 0 8px 20px rgba(31,28,25,0.08);
+
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --ease-soft: cubic-bezier(.33,.08,.22,1);
+
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "cv11";
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: var(--safe-top);
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+  }
+
+  button, input, textarea, select {
+    font-family: inherit; color: inherit;
+    -webkit-appearance: none; appearance: none;
+    border: none; background: none;
+  }
+
+  input, textarea { font-size: 16px; /* prevents iOS zoom */ }
+
+  /* ---------- Layout ---------- */
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-bottom: calc(120px + var(--safe-bottom));
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    padding: 32px 24px 20px;
+    text-align: center;
+    position: relative;
+  }
+  .masthead .eyebrow {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .masthead h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(38px, 10vw, 52px);
+    line-height: 0.95;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .masthead h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold-ink);
+  }
+  .masthead .issue {
+    margin-top: 10px;
+    font-family: var(--sans);
+    font-size: 10px;
+    color: var(--muted-fg);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+  }
+  .masthead .rule {
+    height: 1px; width: 56px;
+    background: var(--gold); opacity: 0.7;
+    margin: 14px auto 0;
+  }
+  .settings-btn {
+    position: absolute;
+    top: calc(20px + var(--safe-top));
+    right: 20px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--ink-soft);
+    transition: background .3s var(--ease);
+  }
+  .settings-btn:active { background: var(--surface-muted); }
+  .settings-btn svg { width: 18px; height: 18px; }
+
+  .sync-badge {
+    position: absolute;
+    top: calc(24px + var(--safe-top));
+    left: 24px;
+    font-size: 9px; letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sync-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--hairline);
+  }
+  .sync-badge.is-connected .dot { background: var(--success); }
+  .sync-badge.is-syncing .dot { background: var(--gold); animation: pulse 1.2s infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px 8px;
+    gap: 16px;
+  }
+  .count {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted-fg);
+    font-weight: 400;
+  }
+  .count strong {
+    font-style: normal;
+    font-family: var(--sans);
+    color: var(--ink);
+    font-weight: 500;
+    margin-right: 4px;
+    font-size: 13px;
+  }
+
+  .sort-toggle {
+    display: flex;
+    background: var(--surface-muted);
+    border-radius: 999px;
+    padding: 3px;
+    position: relative;
+  }
+  .sort-toggle button {
+    position: relative;
+    z-index: 1;
+    padding: 7px 14px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    transition: color .3s var(--ease);
+    cursor: pointer;
+  }
+  .sort-toggle button.active { color: var(--ink); }
+  .sort-toggle .slider {
+    position: absolute;
+    top: 3px; bottom: 3px;
+    width: calc(50% - 3px);
+    background: var(--bg);
+    border-radius: 999px;
+    transition: transform .45s var(--ease);
+    box-shadow: var(--shadow-sm);
+  }
+  .sort-toggle[data-sort="brand"] .slider { transform: translateX(100%); }
+
+  /* ---------- Section labels (group headers) ---------- */
+  .group-label {
+    padding: 28px 24px 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .group-label .name {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .group-label .name em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold-ink);
+  }
+  .group-label .meta {
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+  }
+  .group-label .hair {
+    flex: 1;
+    height: 1px;
+    background: var(--hairline-soft);
+    transform: translateY(-4px);
+  }
+
+  /* ---------- Hotel entries ---------- */
+  .entry {
+    padding: 18px 24px 22px;
+    border-top: 1px solid var(--hairline-soft);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background .3s var(--ease), padding .5s var(--ease);
+    animation: rise .6s var(--ease) both;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .entry:active { background: var(--surface-muted); }
+
+  .entry .hotel-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.15;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    margin: 0;
+  }
+  .entry .hotel-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .entry .hotel-meta .sep {
+    width: 10px; height: 1px;
+    background: var(--hairline);
+  }
+  .entry .hotel-brand { color: var(--gold-ink); }
+  .entry .notes {
+    grid-column: 1 / -1;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    font-weight: 400;
+    padding-right: 8px;
+  }
+
+  .rating {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    min-width: 64px;
+    padding-top: 2px;
+  }
+  .rating .n {
+    font-family: var(--serif);
+    font-size: 32px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .rating .of {
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* ---------- Empty state ---------- */
+  .empty {
+    padding: 80px 32px;
+    text-align: center;
+    color: var(--muted-fg);
+  }
+  .empty .orn {
+    font-family: var(--serif);
+    font-size: 48px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 18px;
+    font-style: italic;
+  }
+  .empty h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.2;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  .empty h2 em {
+    font-style: italic; color: var(--gold-ink);
+  }
+  .empty p {
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 32ch;
+    margin: 0 auto;
+  }
+
+  /* ---------- Floating action ---------- */
+  .fab-wrap {
+    position: fixed;
+    left: 0; right: 0;
+    bottom: calc(20px + var(--safe-bottom));
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 30;
+  }
+  .fab {
+    pointer-events: auto;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    padding: 16px 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    transition: transform .35s var(--ease), background .25s var(--ease);
+  }
+  .fab:active { transform: translateY(1px) scale(.98); }
+  .fab .plus {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--ink);
+    display: grid; place-items: center;
+    font-size: 16px; font-weight: 400; line-height: 1;
+  }
+
+  /* ---------- Modal / Sheet ---------- */
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(31,28,25,0.38);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s var(--ease);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+  }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+
+  .sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: var(--bg);
+    border-radius: 24px 24px 0 0;
+    max-height: 92dvh;
+    max-height: 92vh;
+    transform: translateY(100%);
+    transition: transform .55s var(--ease-soft);
+    z-index: 50;
+    display: flex; flex-direction: column;
+    box-shadow: 0 -30px 60px rgba(31,28,25,0.2);
+    overflow: hidden;
+  }
+  .sheet.show { transform: translateY(0); }
+
+  .sheet .handle {
+    width: 44px; height: 4px; border-radius: 99px;
+    background: var(--hairline); margin: 10px auto 0;
+    flex: 0 0 auto;
+  }
+  .sheet .sheet-head {
+    padding: 20px 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--hairline-soft);
+    flex: 0 0 auto;
+  }
+  .sheet .sheet-head .title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .sheet .sheet-head .title em {
+    font-style: italic;
+    color: var(--gold-ink);
+  }
+  .sheet .close {
+    padding: 8px 14px;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .sheet .sheet-body {
+    padding: 20px 24px calc(40px + var(--safe-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 auto;
+  }
+
+  /* ---------- Form ---------- */
+  .field {
+    margin-bottom: 22px;
+  }
+  .field label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field textarea {
+    width: 100%;
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--ink);
+    padding: 6px 0 10px;
+    background: transparent;
+    border-bottom: 1px solid var(--hairline);
+    transition: border-color .3s var(--ease);
+    border-radius: 0;
+  }
+  .field textarea {
+    resize: none;
+    min-height: 92px;
+    line-height: 1.45;
+    font-style: italic;
+    font-size: 17px;
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+  }
+  .field .hint {
+    font-size: 11px;
+    color: var(--muted-fg);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+
+  /* Brand combobox */
+  .brand-wrap { position: relative; }
+  .brand-wrap::after {
+    content: "";
+    position: absolute;
+    right: 2px; top: 18px;
+    width: 6px; height: 6px;
+    border-right: 1px solid var(--muted-fg);
+    border-bottom: 1px solid var(--muted-fg);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+
+  /* Rating stars preview */
+  .stars {
+    display: inline-flex;
+    gap: 3px;
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .stars .half {
+    color: var(--gold);
+    position: relative;
+  }
+
+  /* Form footer */
+  .form-footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hairline-soft);
+  }
+  .btn {
+    cursor: pointer;
+    padding: 16px 18px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    transition: transform .2s var(--ease), background .25s var(--ease), color .25s var(--ease);
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--ink); color: var(--bg); flex: 1; }
+  .btn.ghost { background: transparent; color: var(--muted-fg); }
+  .btn.ghost:active { background: var(--surface-muted); }
+  .btn.outline {
+    border: 1px solid var(--hairline);
+    color: var(--ink-soft);
+    background: transparent;
+  }
+  .btn.danger {
+    color: var(--danger);
+    border: 1px solid var(--hairline);
+  }
+  .btn.full { width: 100%; }
+  .btn.gold { background: var(--gold); color: var(--ink); }
+
+  /* ---------- Settings sheet ---------- */
+  .settings-section {
+    margin-bottom: 28px;
+  }
+  .settings-section h3 {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 4px;
+    letter-spacing: -0.005em;
+  }
+  .settings-section h3 em {
+    font-style: italic; color: var(--gold-ink);
+  }
+  .settings-section p {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted-fg);
+    margin: 0 0 14px;
+  }
+  .settings-section .row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .settings-section .row .btn { flex: 1 1 0; min-width: 140px; }
+
+  .divider-orn {
+    text-align: center;
+    color: var(--gold);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    margin: 28px 0;
+    letter-spacing: 4px;
+    opacity: 0.65;
+  }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(100px + var(--safe-bottom));
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity .3s var(--ease), transform .45s var(--ease);
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.err { background: var(--danger); }
+  .toast.ok { background: var(--ink); }
+
+  /* ---------- Detail sheet ---------- */
+  .detail {
+    padding: 0 0 10px;
+  }
+  .detail .city-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .detail .hero-name {
+    font-family: var(--serif);
+    font-size: clamp(32px, 8vw, 42px);
+    line-height: 1.02;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .detail .hero-name em {
+    font-style: italic; color: var(--gold-ink); font-weight: 400;
+  }
+  .detail .brand-line {
+    margin-top: 14px;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-ink);
+    font-weight: 500;
+  }
+  .detail .rating-big {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-top: 26px;
+    padding: 20px 0;
+    border-top: 1px solid var(--hairline-soft);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .detail .rating-big .n {
+    font-family: var(--serif);
+    font-size: 64px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .detail .rating-big .label {
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+    flex: 1;
+    text-align: right;
+  }
+  .detail .notes-big {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 28px 0 0;
+    padding-left: 16px;
+    border-left: 1px solid var(--gold);
+    font-weight: 400;
+  }
+
+  .detail-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hairline-soft);
+  }
+
+  /* ---------- Subtle textarea for import ---------- */
+  .textarea-block {
+    width: 100%;
+    min-height: 140px;
+    padding: 14px;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: var(--surface-muted);
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    resize: vertical;
+  }
+  .textarea-block:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  /* version badge */
+  .version {
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+    padding: 10px 0 2px;
+  }
+
+  /* iOS install banner */
+  .install-hint {
+    margin: 20px 24px 0;
+    padding: 14px 16px;
+    border: 1px dashed var(--hairline);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--muted-fg);
+    line-height: 1.55;
+    text-align: center;
+  }
+  .install-hint strong { color: var(--ink); font-weight: 500; }
+
+  /* small screens tweaks */
+  @media (max-width: 380px) {
+    .masthead { padding: 28px 18px 16px; }
+    .toolbar { padding: 14px 18px 6px; }
+    .entry { padding: 16px 18px 20px; }
+    .group-label { padding: 22px 18px 8px; }
+    .entry .hotel-name { font-size: 20px; }
+    .rating .n { font-size: 28px; }
+    .field-row { grid-template-columns: 1fr; gap: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="masthead">
+    <div class="sync-badge" id="syncBadge"><span class="dot"></span><span id="syncLabel">Local</span></div>
+    <button class="settings-btn" id="openSettings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+
+    <div class="eyebrow">Volume <span id="issueVol">I</span> &middot; Private Collection</div>
+    <h1>Hotel <em>Journal</em></h1>
+    <div class="rule"></div>
+    <div class="issue">A personal register of stays</div>
+  </header>
+
+  <div class="toolbar">
+    <div class="count"><strong id="countN">0</strong> <span id="countWord">entries</span></div>
+    <div class="sort-toggle" data-sort="city" id="sortToggle" role="tablist">
+      <span class="slider"></span>
+      <button data-sort="city" class="active" role="tab">City</button>
+      <button data-sort="brand" role="tab">Brand</button>
+    </div>
+  </div>
+
+  <main id="list" aria-live="polite"></main>
+
+  <div id="installHint" class="install-hint" style="display:none;">
+    <strong>Install to home screen</strong><br/>
+    In Safari, tap <strong>Share</strong> &rarr; <strong>Add to Home Screen</strong> to use Hotel Journal like a native app.
+  </div>
+</div>
+
+<div class="fab-wrap">
+  <button class="fab" id="addBtn">
+    <span class="plus">+</span>
+    <span>New Entry</span>
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Scrim -->
+<div class="scrim" id="scrim"></div>
+
+<!-- Edit / Add sheet -->
+<section class="sheet" id="editSheet" aria-hidden="true">
+  <div class="handle"></div>
+  <div class="sheet-head">
+    <div class="title" id="editTitle">New <em>entry</em></div>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body">
+    <form id="editForm" autocomplete="off">
+      <div class="field-row">
+        <div class="field">
+          <label for="f-city">City</label>
+          <input type="text" id="f-city" required placeholder="Kyoto" />
+        </div>
+        <div class="field">
+          <label for="f-brand">Brand</label>
+          <div class="brand-wrap">
+            <input type="text" id="f-brand" list="brandList" placeholder="Aman" />
+            <datalist id="brandList"></datalist>
+          </div>
+          <div class="hint">Prior brands autocomplete.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-name">Hotel name</label>
+        <input type="text" id="f-name" required placeholder="Aman Kyoto" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="f-rating">Rating (0&ndash;5, up to 2 decimals)</label>
+          <input type="number" id="f-rating" min="0" max="5" step="0.01" inputmode="decimal" placeholder="4.75" />
+          <div class="stars" id="starsPreview" aria-hidden="true"></div>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <div class="hint" style="margin-top:10px;">Tap stars are decorative; the number you enter is what's saved.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-notes">Notes</label>
+        <textarea id="f-notes" placeholder="Moss gardens at dawn. Soaking tub overlooking the cedars."></textarea>
+      </div>
+
+      <div class="form-footer">
+        <button type="button" class="btn ghost" id="deleteBtn" style="display:none;">Delete</button>
+        <button type="submit" class="btn primary" id="saveBtn">Save entry</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- Detail sheet -->
+<section class="sheet" id="detailSheet" aria-hidden="true">
+  <div class="handle"></div>
+  <div class="sheet-head">
+    <div class="title">The <em>entry</em></div>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body" id="detailBody"></div>
+</section>
+
+<!-- Settings sheet -->
+<section class="sheet" id="settingsSheet" aria-hidden="true">
+  <div class="handle"></div>
+  <div class="sheet-head">
+    <div class="title">The <em>workings</em></div>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body">
+
+    <div class="settings-section">
+      <h3>Cross-device <em>sync</em></h3>
+      <p>Sync uses a private GitHub Gist. Create a Personal Access Token with the <code>gist</code> scope at <em>github.com/settings/tokens</em>, paste it below, and press <strong>Sync now</strong>. A new gist is created on first sync; afterwards, the same token on another device pulls your data down.</p>
+
+      <div class="field">
+        <label for="s-token">GitHub Personal Access Token (gist scope)</label>
+        <input type="text" id="s-token" placeholder="ghp_..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label for="s-gist">Gist ID (optional — auto-filled after first sync)</label>
+        <input type="text" id="s-gist" placeholder="(leave blank on a new device if using existing gist, paste its ID)" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <div class="hint">On a new device: paste an existing Gist ID, then press <strong>Pull from cloud</strong>.</div>
+      </div>
+
+      <div class="row">
+        <button class="btn primary" id="syncNowBtn">Sync now</button>
+        <button class="btn outline" id="pullBtn">Pull from cloud</button>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn ghost" id="pushBtn">Push to cloud</button>
+      </div>
+    </div>
+
+    <div class="divider-orn">&sect;</div>
+
+    <div class="settings-section">
+      <h3>Import &amp; <em>export</em></h3>
+      <p>JSON is for moving everything between phones. XLSX is for spreadsheet review.</p>
+      <div class="row">
+        <button class="btn outline" id="exportJsonBtn">Export JSON</button>
+        <button class="btn outline" id="importJsonBtn">Import JSON</button>
+        <button class="btn gold" id="exportXlsxBtn">Export .xlsx</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none;" />
+    </div>
+
+    <div class="divider-orn">&sect;</div>
+
+    <div class="settings-section">
+      <h3>App <em>updates</em></h3>
+      <p>When you push a new version to GitHub, Hotel Journal can force-refresh its cache. Paste the <strong>raw</strong> URL to your <code>index.html</code> (https://raw.githubusercontent.com/&hellip;/main/index.html).</p>
+      <div class="field">
+        <label for="s-rawurl">Raw index.html URL</label>
+        <input type="text" id="s-rawurl" placeholder="https://raw.githubusercontent.com/username/hotel-journal/main/index.html" autocapitalize="off" autocorrect="off" spellcheck="false" />
+      </div>
+      <div class="row">
+        <button class="btn outline" id="checkUpdateBtn">Check for update</button>
+        <button class="btn danger" id="forceUpdateBtn">Force reload</button>
+      </div>
+    </div>
+
+    <div class="divider-orn">&sect;</div>
+
+    <div class="settings-section">
+      <h3>Danger <em>zone</em></h3>
+      <p>Erase all local entries. Cloud copy is untouched unless you then press <strong>Push to cloud</strong>.</p>
+      <div class="row">
+        <button class="btn danger" id="wipeBtn">Erase local data</button>
+      </div>
+    </div>
+
+    <div class="version">Version <span id="versionLabel"></span></div>
+  </div>
+</section>
+
+<!-- Import paste sheet -->
+<section class="sheet" id="importSheet" aria-hidden="true">
+  <div class="handle"></div>
+  <div class="sheet-head">
+    <div class="title">Import <em>JSON</em></div>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body">
+    <p style="font-size:13px; color:var(--muted-fg); line-height:1.55; margin-top:0;">
+      Paste exported JSON below, or use the file picker. Importing replaces all local data.
+    </p>
+    <textarea class="textarea-block" id="importText" placeholder='{"hotels":[...],"brands":[...]}'></textarea>
+    <div class="row" style="margin-top:14px; display:flex; gap:10px;">
+      <button class="btn outline" id="pickFileBtn">Choose file&hellip;</button>
+      <button class="btn primary" id="doImportBtn">Import</button>
+    </div>
+  </div>
+</section>
+
+<!-- SheetJS for .xlsx export -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+/* ============================================================
+ * Hotel Journal
+ * Single-file iPhone web app, Luxury/Editorial.
+ * ============================================================ */
+
+const VERSION = "1.0.0";
+document.getElementById('versionLabel').textContent = VERSION;
+
+const LS = {
+  HOTELS: 'hj.hotels.v1',
+  BRANDS: 'hj.brands.v1',
+  SORT:   'hj.sort.v1',
+  TOKEN:  'hj.gh.token.v1',
+  GIST:   'hj.gh.gist.v1',
+  RAWURL: 'hj.rawurl.v1',
+};
+
+/* ---------- State ---------- */
+let state = {
+  hotels: load(LS.HOTELS, []),   // [{id, city, name, brand, rating, notes, updated}]
+  brands: load(LS.BRANDS, []),   // distinct brand names
+  sort:   load(LS.SORT,   'city'),
+  editingId: null,
+};
+
+function load(key, fallback) {
+  try {
+    const v = localStorage.getItem(key);
+    return v == null ? fallback : JSON.parse(v);
+  } catch(e) { return fallback; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+function uid() {
+  return 'h_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+}
+
+/* ---------- DOM ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+const list        = $('#list');
+const scrim       = $('#scrim');
+const editSheet   = $('#editSheet');
+const detailSheet = $('#detailSheet');
+const settingsSheet = $('#settingsSheet');
+const importSheet = $('#importSheet');
+const toast       = $('#toast');
+const syncBadge   = $('#syncBadge');
+const syncLabel   = $('#syncLabel');
+
+/* ---------- Sheet helpers ---------- */
+function openSheet(sheet) {
+  scrim.classList.add('show');
+  sheet.classList.add('show');
+  sheet.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+}
+function closeAllSheets() {
+  scrim.classList.remove('show');
+  [editSheet, detailSheet, settingsSheet, importSheet].forEach(s => {
+    s.classList.remove('show');
+    s.setAttribute('aria-hidden','true');
+  });
+  document.body.style.overflow = '';
+}
+scrim.addEventListener('click', closeAllSheets);
+$$('[data-close]').forEach(b => b.addEventListener('click', closeAllSheets));
+
+/* ---------- Toasts ---------- */
+let toastT;
+function showToast(msg, kind='ok', ms=2200) {
+  toast.textContent = msg;
+  toast.className = 'toast show ' + kind;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { toast.className = 'toast'; }, ms);
+}
+
+/* ---------- Utilities ---------- */
+function formatRating(r) {
+  const n = Number(r);
+  if (!isFinite(n)) return '—';
+  // Up to 2 decimals, trim trailing zeros, but keep at least one decimal for elegance when non-integer
+  const rounded = Math.round(n * 100) / 100;
+  if (Number.isInteger(rounded)) return rounded.toFixed(1);
+  return rounded.toString();
+}
+function normalizeBrand(b) {
+  return (b || '').trim();
+}
+function updateBrands() {
+  const set = new Map();
+  state.hotels.forEach(h => {
+    const b = normalizeBrand(h.brand);
+    if (b) set.set(b.toLowerCase(), b);
+  });
+  state.brands = Array.from(set.values()).sort((a,b) => a.localeCompare(b));
+  save(LS.BRANDS, state.brands);
+  renderBrandDatalist();
+}
+function renderBrandDatalist() {
+  const dl = $('#brandList');
+  dl.innerHTML = state.brands.map(b => `<option value="${escapeAttr(b)}"></option>`).join('');
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+/* ---------- Rendering ---------- */
+function render() {
+  // update count
+  const n = state.hotels.length;
+  $('#countN').textContent = n;
+  $('#countWord').textContent = n === 1 ? 'entry' : 'entries';
+
+  // sort toggle visual
+  $('#sortToggle').setAttribute('data-sort', state.sort);
+  $$('#sortToggle button').forEach(b => b.classList.toggle('active', b.dataset.sort === state.sort));
+
+  if (n === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="orn">&sect;</div>
+        <h2>A blank <em>page</em>.</h2>
+        <p>Begin by adding the first hotel to your private register. Tap <strong>New Entry</strong> below.</p>
+      </div>`;
+    $('#installHint').style.display = isStandalone() ? 'none' : 'block';
+    return;
+  }
+  $('#installHint').style.display = 'none';
+
+  const key = state.sort === 'brand' ? 'brand' : 'city';
+  const groups = {};
+  state.hotels.forEach(h => {
+    const g = (h[key] || '—').trim() || '—';
+    (groups[g] = groups[g] || []).push(h);
+  });
+  const orderedGroups = Object.keys(groups).sort((a,b) => a.localeCompare(b, undefined, {sensitivity:'base'}));
+
+  let html = '';
+  orderedGroups.forEach(g => {
+    const items = groups[g].slice().sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {sensitivity:'base'}));
+    const meta = key === 'brand' ? 'Brand' : 'City';
+    const firstWord = g.split(/\s+/)[0];
+    const restWord  = g.slice(firstWord.length);
+    html += `
+      <div class="group-label">
+        <div class="name"><em>${escapeHtml(firstWord)}</em>${escapeHtml(restWord)}</div>
+        <div class="hair"></div>
+        <div class="meta">${meta} &middot; ${items.length}</div>
+      </div>`;
+    items.forEach(h => { html += entryHTML(h, key); });
+  });
+  list.innerHTML = html;
+
+  // click → detail
+  $$('#list .entry').forEach(el => {
+    el.addEventListener('click', () => openDetail(el.dataset.id));
+  });
+}
+
+function entryHTML(h, keyShown) {
+  const rating = formatRating(h.rating);
+  const showCity = keyShown !== 'city';
+  const showBrand = keyShown !== 'brand';
+  const metaParts = [];
+  if (showCity && h.city) metaParts.push(`<span>${escapeHtml(h.city)}</span>`);
+  if (showBrand && h.brand) metaParts.push(`<span class="hotel-brand">${escapeHtml(h.brand)}</span>`);
+  const metaHtml = metaParts.length
+    ? metaParts.join('<span class="sep"></span>')
+    : `<span>${keyShown === 'city' ? escapeHtml(h.brand||'—') : escapeHtml(h.city||'—')}</span>`;
+  const notes = h.notes ? `<div class="notes">&ldquo;${escapeHtml(h.notes)}&rdquo;</div>` : '';
+  return `
+    <article class="entry" data-id="${h.id}">
+      <div>
+        <h3 class="hotel-name">${escapeHtml(h.name||'Untitled')}</h3>
+        <div class="hotel-meta">${metaHtml}</div>
+        ${notes}
+      </div>
+      <div class="rating">
+        <div class="n">${rating}</div>
+        <div class="of">/ 5</div>
+      </div>
+    </article>`;
+}
+
+function isStandalone() {
+  return window.navigator.standalone === true
+      || window.matchMedia('(display-mode: standalone)').matches;
+}
+
+/* ---------- Detail ---------- */
+function openDetail(id) {
+  const h = state.hotels.find(x => x.id === id);
+  if (!h) return;
+  const rating = formatRating(h.rating);
+  $('#detailBody').innerHTML = `
+    <div class="detail">
+      <div class="city-eyebrow">${escapeHtml(h.city || '—')}</div>
+      <h2 class="hero-name">${emphasizeFirstWord(h.name||'Untitled')}</h2>
+      ${h.brand ? `<div class="brand-line">${escapeHtml(h.brand)}</div>` : ''}
+      <div class="rating-big">
+        <div class="n">${rating}</div>
+        <div class="label">Out of 5.00</div>
+      </div>
+      ${h.notes ? `<blockquote class="notes-big">${escapeHtml(h.notes)}</blockquote>` : ''}
+      <div class="detail-actions">
+        <button class="btn outline" id="editFromDetail">Edit</button>
+        <button class="btn danger" id="delFromDetail">Delete</button>
+      </div>
+    </div>`;
+  openSheet(detailSheet);
+  $('#editFromDetail').onclick = () => { closeAllSheets(); setTimeout(() => openEdit(id), 300); };
+  $('#delFromDetail').onclick  = () => {
+    if (confirm('Delete this entry?')) { deleteHotel(id); closeAllSheets(); }
+  };
+}
+
+function emphasizeFirstWord(s) {
+  const parts = s.split(/\s+/);
+  if (parts.length === 1) return `<em>${escapeHtml(s)}</em>`;
+  return `<em>${escapeHtml(parts[0])}</em> ${escapeHtml(parts.slice(1).join(' '))}`;
+}
+
+/* ---------- Edit ---------- */
+function openEdit(id=null) {
+  state.editingId = id;
+  const h = id ? state.hotels.find(x => x.id === id) : null;
+  $('#editTitle').innerHTML = h ? 'Edit <em>entry</em>' : 'New <em>entry</em>';
+  $('#f-city').value   = h?.city   || '';
+  $('#f-name').value   = h?.name   || '';
+  $('#f-brand').value  = h?.brand  || '';
+  $('#f-rating').value = h?.rating != null ? h.rating : '';
+  $('#f-notes').value  = h?.notes  || '';
+  $('#deleteBtn').style.display = h ? 'inline-flex' : 'none';
+  renderStars(h?.rating);
+  renderBrandDatalist();
+  openSheet(editSheet);
+  setTimeout(() => $('#f-city').focus(), 300);
+}
+
+function renderStars(rating) {
+  const r = Math.max(0, Math.min(5, Number(rating) || 0));
+  const full = Math.floor(r);
+  const frac = r - full;
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    if (i < full) html += '★';
+    else if (i === full && frac >= 0.25 && frac <= 0.75) html += '⯨'; // half approximation
+    else if (i === full && frac > 0.75) html += '★';
+    else html += '<span style="color:var(--hairline)">★</span>';
+  }
+  $('#starsPreview').innerHTML = html;
+}
+$('#f-rating').addEventListener('input', e => renderStars(e.target.value));
+
+$('#editForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const rawRating = $('#f-rating').value.trim();
+  let rating = null;
+  if (rawRating !== '') {
+    const n = Number(rawRating);
+    if (!isFinite(n) || n < 0 || n > 5) {
+      showToast('Rating must be 0–5', 'err'); return;
+    }
+    rating = Math.round(n * 100) / 100;
+  }
+  const entry = {
+    id: state.editingId || uid(),
+    city:  $('#f-city').value.trim(),
+    name:  $('#f-name').value.trim(),
+    brand: normalizeBrand($('#f-brand').value),
+    rating,
+    notes: $('#f-notes').value.trim(),
+    updated: Date.now(),
+  };
+  if (!entry.city || !entry.name) {
+    showToast('City and hotel name required', 'err'); return;
+  }
+  if (state.editingId) {
+    const i = state.hotels.findIndex(x => x.id === state.editingId);
+    if (i >= 0) state.hotels[i] = entry;
+  } else {
+    state.hotels.push(entry);
+  }
+  save(LS.HOTELS, state.hotels);
+  updateBrands();
+  closeAllSheets();
+  render();
+  showToast(state.editingId ? 'Updated' : 'Added');
+  state.editingId = null;
+});
+
+$('#deleteBtn').addEventListener('click', () => {
+  if (!state.editingId) return;
+  if (!confirm('Delete this entry?')) return;
+  deleteHotel(state.editingId);
+  closeAllSheets();
+});
+
+function deleteHotel(id) {
+  state.hotels = state.hotels.filter(x => x.id !== id);
+  save(LS.HOTELS, state.hotels);
+  updateBrands();
+  render();
+  showToast('Deleted');
+}
+
+/* ---------- Top-level buttons ---------- */
+$('#addBtn').addEventListener('click', () => openEdit());
+$('#openSettings').addEventListener('click', () => {
+  $('#s-token').value  = load(LS.TOKEN, '');
+  $('#s-gist').value   = load(LS.GIST, '');
+  $('#s-rawurl').value = load(LS.RAWURL, '');
+  openSheet(settingsSheet);
+});
+
+/* ---------- Sort ---------- */
+$('#sortToggle').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-sort]');
+  if (!btn) return;
+  state.sort = btn.dataset.sort;
+  save(LS.SORT, state.sort);
+  render();
+});
+
+/* ============================================================
+ * Sync via GitHub Gist
+ * ============================================================ */
+function setSyncState(kind, label) {
+  syncBadge.className = 'sync-badge' + (kind ? ' is-' + kind : '');
+  syncLabel.textContent = label;
+}
+function syncReady() {
+  const t = load(LS.TOKEN, '');
+  return !!t;
+}
+function refreshSyncBadge() {
+  const t = load(LS.TOKEN, '');
+  const g = load(LS.GIST, '');
+  if (!t) setSyncState('', 'Local');
+  else if (t && !g) setSyncState('connected', 'Token set');
+  else setSyncState('connected', 'Cloud');
+}
+
+async function ghFetch(url, opts={}) {
+  const token = $('#s-token').value.trim() || load(LS.TOKEN, '');
+  if (!token) throw new Error('No GitHub token');
+  const res = await fetch(url, {
+    ...opts,
+    headers: {
+      'Accept': 'application/vnd.github+json',
+      'Authorization': 'token ' + token,
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(opts.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(()=>'');
+    throw new Error(`GitHub ${res.status}: ${body.slice(0,160)}`);
+  }
+  return res.json();
+}
+
+async function pushToCloud() {
+  const token = $('#s-token').value.trim();
+  if (!token) { showToast('Enter a GitHub token first', 'err'); return; }
+  save(LS.TOKEN, token);
+  setSyncState('syncing', 'Pushing…');
+
+  const payload = JSON.stringify({
+    version: VERSION,
+    updated: Date.now(),
+    hotels: state.hotels,
+    brands: state.brands,
+  }, null, 2);
+
+  const file = { 'hotel-journal-data.json': { content: payload } };
+  const gistId = $('#s-gist').value.trim() || load(LS.GIST, '');
+
+  try {
+    let gist;
+    if (gistId) {
+      gist = await ghFetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ files: file, description: 'Hotel Journal data' }),
+      });
+    } else {
+      gist = await ghFetch(`https://api.github.com/gists`, {
+        method: 'POST',
+        body: JSON.stringify({
+          description: 'Hotel Journal data',
+          public: false,
+          files: file,
+        }),
+      });
+      save(LS.GIST, gist.id);
+      $('#s-gist').value = gist.id;
+    }
+    refreshSyncBadge();
+    showToast('Synced to cloud');
+  } catch(e) {
+    console.error(e);
+    setSyncState('', 'Error');
+    showToast('Sync failed: ' + e.message, 'err', 3600);
+  }
+}
+
+async function pullFromCloud() {
+  const token = $('#s-token').value.trim();
+  const gistId = $('#s-gist').value.trim() || load(LS.GIST, '');
+  if (!token) { showToast('Enter a GitHub token first', 'err'); return; }
+  if (!gistId) { showToast('Enter a Gist ID or Sync now to create one', 'err'); return; }
+  save(LS.TOKEN, token);
+  save(LS.GIST, gistId);
+  setSyncState('syncing', 'Pulling…');
+  try {
+    const gist = await ghFetch(`https://api.github.com/gists/${gistId}`);
+    const file = gist.files['hotel-journal-data.json'];
+    if (!file) throw new Error('No data file in gist');
+    let content = file.content;
+    if (file.truncated && file.raw_url) {
+      content = await (await fetch(file.raw_url)).text();
+    }
+    const payload = JSON.parse(content);
+    applyImported(payload);
+    refreshSyncBadge();
+    showToast('Pulled from cloud');
+  } catch(e) {
+    console.error(e);
+    setSyncState('', 'Error');
+    showToast('Pull failed: ' + e.message, 'err', 3600);
+  }
+}
+
+async function syncNow() {
+  const token = $('#s-token').value.trim();
+  if (!token) { showToast('Enter a GitHub token first', 'err'); return; }
+  save(LS.TOKEN, token);
+  const gistId = $('#s-gist').value.trim() || load(LS.GIST, '');
+  if (gistId) {
+    // Merge-ish: pull latest; if remote newer (updated ts higher), pull, else push
+    try {
+      setSyncState('syncing', 'Syncing…');
+      const gist = await ghFetch(`https://api.github.com/gists/${gistId}`);
+      const file = gist.files['hotel-journal-data.json'];
+      if (file) {
+        let content = file.content;
+        if (file.truncated && file.raw_url) {
+          content = await (await fetch(file.raw_url)).text();
+        }
+        const remote = JSON.parse(content || '{}');
+        const remoteTs = remote.updated || 0;
+        const localTs = Math.max(0, ...state.hotels.map(h => h.updated||0));
+        if (remoteTs > localTs) {
+          applyImported(remote);
+          showToast('Pulled newer cloud copy');
+          refreshSyncBadge();
+          return;
+        }
+      }
+      await pushToCloud();
+    } catch(e) {
+      console.error(e);
+      setSyncState('', 'Error');
+      showToast('Sync failed: ' + e.message, 'err', 3600);
+    }
+  } else {
+    await pushToCloud();
+  }
+}
+
+$('#syncNowBtn').addEventListener('click', syncNow);
+$('#pushBtn').addEventListener('click', pushToCloud);
+$('#pullBtn').addEventListener('click', pullFromCloud);
+
+/* Persist settings on blur */
+['s-token','s-gist','s-rawurl'].forEach(id => {
+  const key = id === 's-token' ? LS.TOKEN : id === 's-gist' ? LS.GIST : LS.RAWURL;
+  $('#'+id).addEventListener('change', e => {
+    save(key, e.target.value.trim());
+    refreshSyncBadge();
+  });
+});
+
+/* ============================================================
+ * Import / Export
+ * ============================================================ */
+function exportJson() {
+  const payload = {
+    version: VERSION,
+    exported: new Date().toISOString(),
+    hotels: state.hotels,
+    brands: state.brands,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hotel-journal-${ymd()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  showToast('JSON exported');
+}
+function ymd() {
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+function applyImported(payload) {
+  if (!payload || !Array.isArray(payload.hotels)) throw new Error('Invalid data');
+  // Basic validation/normalization
+  const hotels = payload.hotels.map(h => ({
+    id: h.id || uid(),
+    city: String(h.city||'').trim(),
+    name: String(h.name||'').trim(),
+    brand: String(h.brand||'').trim(),
+    rating: h.rating == null || h.rating === '' ? null : Math.round(Number(h.rating)*100)/100,
+    notes: String(h.notes||''),
+    updated: Number(h.updated||Date.now()),
+  }));
+  state.hotels = hotels;
+  save(LS.HOTELS, state.hotels);
+  updateBrands();
+  render();
+}
+
+$('#exportJsonBtn').addEventListener('click', exportJson);
+
+$('#importJsonBtn').addEventListener('click', () => {
+  $('#importText').value = '';
+  closeAllSheets();
+  setTimeout(() => openSheet(importSheet), 260);
+});
+
+$('#pickFileBtn').addEventListener('click', () => $('#importFile').click());
+$('#importFile').addEventListener('change', async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  try {
+    const text = await f.text();
+    $('#importText').value = text;
+  } catch(err) { showToast('Could not read file', 'err'); }
+  e.target.value = '';
+});
+
+$('#doImportBtn').addEventListener('click', () => {
+  const txt = $('#importText').value.trim();
+  if (!txt) { showToast('Nothing to import', 'err'); return; }
+  try {
+    const payload = JSON.parse(txt);
+    if (!confirm('Importing will replace all local entries. Continue?')) return;
+    applyImported(payload);
+    closeAllSheets();
+    showToast('Imported');
+  } catch(e) { showToast('Invalid JSON', 'err'); }
+});
+
+/* XLSX */
+$('#exportXlsxBtn').addEventListener('click', () => {
+  if (typeof XLSX === 'undefined') { showToast('XLSX library not loaded', 'err'); return; }
+  const rows = state.hotels
+    .slice()
+    .sort((a,b) => (a.city||'').localeCompare(b.city||'') || (a.name||'').localeCompare(b.name||''))
+    .map(h => ({
+      City: h.city || '',
+      'Hotel Name': h.name || '',
+      Brand: h.brand || '',
+      'Rating (/5)': h.rating == null ? '' : Number(h.rating),
+      Notes: h.notes || '',
+      'Last Updated': h.updated ? new Date(h.updated).toISOString().slice(0,19).replace('T',' ') : '',
+    }));
+  const ws = XLSX.utils.json_to_sheet(rows, {header:['City','Hotel Name','Brand','Rating (/5)','Notes','Last Updated']});
+  // Column widths for readability
+  ws['!cols'] = [
+    {wch:22},{wch:32},{wch:22},{wch:12},{wch:52},{wch:20}
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Hotels');
+  XLSX.writeFile(wb, `hotel-journal-${ymd()}.xlsx`);
+  showToast('Excel exported');
+});
+
+/* Wipe */
+$('#wipeBtn').addEventListener('click', () => {
+  if (!confirm('Erase all local entries? This cannot be undone (on this device).')) return;
+  state.hotels = [];
+  state.brands = [];
+  save(LS.HOTELS, state.hotels);
+  save(LS.BRANDS, state.brands);
+  render();
+  showToast('Local data erased');
+});
+
+/* ============================================================
+ * Force update from GitHub
+ * ============================================================ */
+async function checkForUpdate(silent=false) {
+  const url = $('#s-rawurl').value.trim() || load(LS.RAWURL, '');
+  if (!url) {
+    if (!silent) showToast('Enter raw GitHub URL first', 'err');
+    return;
+  }
+  save(LS.RAWURL, url);
+  try {
+    const bust = url + (url.includes('?') ? '&' : '?') + 'cb=' + Date.now();
+    const res = await fetch(bust, {cache:'no-store'});
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const html = await res.text();
+    const m = html.match(/const\s+VERSION\s*=\s*["']([^"']+)["']/);
+    const remote = m ? m[1] : null;
+    if (!remote) {
+      if (!silent) showToast('Could not find version remotely', 'err');
+      return;
+    }
+    if (remote === VERSION) {
+      if (!silent) showToast('You are up to date (' + VERSION + ')');
+      return;
+    }
+    if (confirm(`New version ${remote} available (you have ${VERSION}). Force-reload now?`)) {
+      forceReload();
+    }
+  } catch(e) {
+    if (!silent) showToast('Update check failed: '+e.message, 'err', 3600);
+  }
+}
+async function forceReload() {
+  try {
+    if ('caches' in window) {
+      const names = await caches.keys();
+      await Promise.all(names.map(n => caches.delete(n)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  } catch(e) { /* ignore */ }
+  const url = new URL(window.location.href);
+  url.searchParams.set('cb', Date.now().toString());
+  window.location.replace(url.toString());
+}
+$('#checkUpdateBtn').addEventListener('click', () => checkForUpdate(false));
+$('#forceUpdateBtn').addEventListener('click', () => {
+  if (confirm('Force-reload the app (clears cache)?')) forceReload();
+});
+
+/* ============================================================
+ * Boot
+ * ============================================================ */
+function init() {
+  renderBrandDatalist();
+  updateBrands();
+  render();
+  refreshSyncBadge();
+
+  // Silent auto update check once per session if URL configured
+  const url = load(LS.RAWURL, '');
+  if (url) {
+    setTimeout(() => {
+      // Non-intrusive: only prompt if different version
+      checkForUpdate(true).catch(()=>{});
+    }, 2500);
+  }
+}
+init();
+
+</script>
+</body>
+</html>
