@@ -215,13 +215,16 @@
   .sort-toggle .slider {
     position: absolute;
     top: 3px; bottom: 3px;
-    width: calc(50% - 3px);
+    width: calc(33.333% - 2px);
     background: var(--bg);
     border-radius: 999px;
     transition: transform .45s var(--ease);
     box-shadow: var(--shadow-sm);
   }
-  .sort-toggle[data-sort="brand"] .slider { transform: translateX(100%); }
+  .sort-toggle[data-sort="city"]    .slider { transform: translateX(0%); }
+  .sort-toggle[data-sort="brand"]   .slider { transform: translateX(100%); }
+  .sort-toggle[data-sort="country"] .slider { transform: translateX(200%); }
+  .sort-toggle button { flex: 1; text-align: center; }
 
   /* ---------- Section labels (group headers) ---------- */
   .group-label {
@@ -302,11 +305,15 @@
     font-family: var(--serif);
     font-style: italic;
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.45;
     color: var(--ink-soft);
     margin-top: 6px;
     font-weight: 400;
     padding-right: 8px;
+    /* clamp to a single visible line */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .rating {
@@ -332,6 +339,108 @@
     margin-top: 4px;
     font-weight: 500;
   }
+
+  /* ---------- "To try" wishlist entries ---------- */
+  .entry.is-wishlist .hotel-name {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--muted-fg);
+  }
+  .entry.is-wishlist .hotel-meta,
+  .entry.is-wishlist .notes {
+    color: var(--muted-fg);
+    opacity: 0.85;
+  }
+  .entry.is-wishlist .notes { font-style: italic; }
+  .entry.is-wishlist .hotel-brand { color: var(--gold-ink); opacity: 0.85; }
+  .entry .wishlist-tag {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--gold-ink);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .entry.is-wishlist .rating .n {
+    font-family: var(--serif);
+    font-size: 30px;
+    color: var(--gold);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .entry.is-wishlist .rating .of { color: var(--gold-ink); opacity: 0.7; }
+
+  /* Soft gold divider between "stayed" and "to try" within a group */
+  .group-divider {
+    margin: 6px 24px 0;
+    height: 0;
+    border-top: 1px dotted var(--gold);
+    opacity: 0.4;
+  }
+  .group-divider-label {
+    padding: 14px 24px 4px;
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold-ink);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .group-divider-label::before,
+  .group-divider-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.35;
+  }
+
+  /* Form: status segmented control */
+  .seg {
+    display: flex;
+    background: var(--surface-muted);
+    border-radius: 999px;
+    padding: 3px;
+    position: relative;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .seg .seg-slider {
+    position: absolute;
+    top: 3px; bottom: 3px;
+    width: calc(50% - 3px);
+    background: var(--bg);
+    border-radius: 999px;
+    transition: transform .45s var(--ease);
+    box-shadow: var(--shadow-sm);
+  }
+  .seg[data-val="wishlist"] .seg-slider { transform: translateX(100%); }
+  .seg button {
+    flex: 1;
+    position: relative; z-index: 1;
+    padding: 10px 14px;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .3s var(--ease);
+  }
+  .seg button.active { color: var(--ink); }
+  .seg button .glyph {
+    color: var(--gold-ink);
+    margin-right: 6px;
+    font-style: italic;
+  }
+
+  .field.rating-field { transition: opacity .3s var(--ease), max-height .4s var(--ease); }
+  .field.rating-field.is-disabled { opacity: 0.35; pointer-events: none; }
 
   /* ---------- Empty state ---------- */
   .empty {
@@ -805,6 +914,7 @@
       <span class="slider"></span>
       <button data-sort="city" class="active" role="tab">City</button>
       <button data-sort="brand" role="tab">Brand</button>
+      <button data-sort="country" role="tab">Country</button>
     </div>
   </div>
 
@@ -838,36 +948,51 @@
   </div>
   <div class="sheet-body">
     <form id="editForm" autocomplete="off">
+      <div class="field">
+        <label>Status</label>
+        <div class="seg" id="statusSeg" data-val="stayed">
+          <span class="seg-slider"></span>
+          <button type="button" data-val="stayed"   class="active"><span class="glyph">★</span>Stayed</button>
+          <button type="button" data-val="wishlist"><span class="glyph">◇</span>To try</button>
+        </div>
+      </div>
+
       <div class="field-row">
         <div class="field">
           <label for="f-city">City</label>
-          <input type="text" id="f-city" required placeholder="Kyoto" />
+          <div class="brand-wrap">
+            <input type="text" id="f-city" required list="cityList" placeholder="Kyoto" autocapitalize="words" />
+            <datalist id="cityList"></datalist>
+          </div>
         </div>
+        <div class="field">
+          <label for="f-country">Country</label>
+          <div class="brand-wrap">
+            <input type="text" id="f-country" list="countryList" placeholder="Japan" autocapitalize="words" />
+            <datalist id="countryList"></datalist>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row">
         <div class="field">
           <label for="f-brand">Brand</label>
           <div class="brand-wrap">
-            <input type="text" id="f-brand" list="brandList" placeholder="Aman" />
+            <input type="text" id="f-brand" list="brandList" placeholder="Aman" autocapitalize="words" />
             <datalist id="brandList"></datalist>
           </div>
           <div class="hint">Prior brands autocomplete.</div>
+        </div>
+        <div class="field rating-field" id="ratingField">
+          <label for="f-rating">Rating (0&ndash;5, 2 decimals)</label>
+          <input type="number" id="f-rating" min="0" max="5" step="0.01" inputmode="decimal" placeholder="4.75" />
+          <div class="stars" id="starsPreview" aria-hidden="true"></div>
         </div>
       </div>
 
       <div class="field">
         <label for="f-name">Hotel name</label>
         <input type="text" id="f-name" required placeholder="Aman Kyoto" />
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="f-rating">Rating (0&ndash;5, up to 2 decimals)</label>
-          <input type="number" id="f-rating" min="0" max="5" step="0.01" inputmode="decimal" placeholder="4.75" />
-          <div class="stars" id="starsPreview" aria-hidden="true"></div>
-        </div>
-        <div class="field">
-          <label>&nbsp;</label>
-          <div class="hint" style="margin-top:10px;">Tap stars are decorative; the number you enter is what's saved.</div>
-        </div>
       </div>
 
       <div class="field">
@@ -995,25 +1120,36 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.0.1";
+const VERSION = "1.2.0";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
-  HOTELS: 'hj.hotels.v1',
-  BRANDS: 'hj.brands.v1',
-  SORT:   'hj.sort.v1',
-  TOKEN:  'hj.gh.token.v1',
-  GIST:   'hj.gh.gist.v1',
-  RAWURL: 'hj.rawurl.v1',
+  HOTELS:    'hj.hotels.v1',
+  BRANDS:    'hj.brands.v1',
+  CITIES:    'hj.cities.v1',
+  COUNTRIES: 'hj.countries.v1',
+  SORT:      'hj.sort.v1',
+  TOKEN:     'hj.gh.token.v1',
+  GIST:      'hj.gh.gist.v1',
+  RAWURL:    'hj.rawurl.v1',
 };
 
 /* ---------- State ---------- */
 let state = {
-  hotels: load(LS.HOTELS, []),   // [{id, city, name, brand, rating, notes, updated}]
-  brands: load(LS.BRANDS, []),   // distinct brand names
-  sort:   load(LS.SORT,   'city'),
+  hotels:    load(LS.HOTELS,    []),  // [{id, city, country, name, brand, rating, notes, updated}]
+  brands:    load(LS.BRANDS,    []),
+  cities:    load(LS.CITIES,    []),
+  countries: load(LS.COUNTRIES, []),
+  sort:      load(LS.SORT,      'city'),  // 'city' | 'brand' | 'country'
   editingId: null,
 };
+
+/* ---------- Migration: ensure each hotel has country and status fields ---------- */
+state.hotels = state.hotels.map(h => ({
+  country: '',
+  status: 'stayed', // 'stayed' | 'wishlist'
+  ...h,
+}));
 
 function load(key, fallback) {
   try {
@@ -1078,23 +1214,38 @@ function formatRating(r) {
   if (Number.isInteger(rounded)) return rounded.toFixed(1);
   return rounded.toString();
 }
-function normalizeBrand(b) {
-  return (b || '').trim();
-}
-function updateBrands() {
+function normTxt(s) { return (s || '').trim(); }
+const normalizeBrand = normTxt;
+
+function uniqSortedFromHotels(field) {
   const set = new Map();
   state.hotels.forEach(h => {
-    const b = normalizeBrand(h.brand);
-    if (b) set.set(b.toLowerCase(), b);
+    const v = normTxt(h[field]);
+    if (v) set.set(v.toLowerCase(), v);
   });
-  state.brands = Array.from(set.values()).sort((a,b) => a.localeCompare(b));
-  save(LS.BRANDS, state.brands);
-  renderBrandDatalist();
+  return Array.from(set.values()).sort((a, b) => a.localeCompare(b, undefined, {sensitivity:'base'}));
 }
-function renderBrandDatalist() {
-  const dl = $('#brandList');
-  dl.innerHTML = state.brands.map(b => `<option value="${escapeAttr(b)}"></option>`).join('');
+
+function updateAutocompleteLists() {
+  state.brands    = uniqSortedFromHotels('brand');
+  state.cities    = uniqSortedFromHotels('city');
+  state.countries = uniqSortedFromHotels('country');
+  save(LS.BRANDS,    state.brands);
+  save(LS.CITIES,    state.cities);
+  save(LS.COUNTRIES, state.countries);
+  renderDatalists();
 }
+
+// Backwards-compatible alias used elsewhere in the file
+const updateBrands = updateAutocompleteLists;
+
+function renderDatalists() {
+  const opts = arr => arr.map(v => `<option value="${escapeAttr(v)}"></option>`).join('');
+  const b = $('#brandList');   if (b) b.innerHTML = opts(state.brands);
+  const c = $('#cityList');    if (c) c.innerHTML = opts(state.cities);
+  const k = $('#countryList'); if (k) k.innerHTML = opts(state.countries);
+}
+const renderBrandDatalist = renderDatalists; // alias
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -1104,8 +1255,11 @@ function escapeAttr(s) { return escapeHtml(s); }
 function render() {
   // update count
   const n = state.hotels.length;
-  $('#countN').textContent = n;
-  $('#countWord').textContent = n === 1 ? 'entry' : 'entries';
+  const wishCount = state.hotels.filter(h => h.status === 'wishlist').length;
+  const stayCount = n - wishCount;
+  $('#countN').textContent = stayCount;
+  $('#countWord').innerHTML = (stayCount === 1 ? 'stay' : 'stays')
+    + (wishCount > 0 ? ` &middot; <em style="font-style:italic;color:var(--gold-ink);">${wishCount}</em> to try` : '');
 
   // sort toggle visual
   $('#sortToggle').setAttribute('data-sort', state.sort);
@@ -1123,27 +1277,57 @@ function render() {
   }
   $('#installHint').style.display = 'none';
 
-  const key = state.sort === 'brand' ? 'brand' : 'city';
+  const validSorts = { city:'City', brand:'Brand', country:'Country' };
+  const key = validSorts[state.sort] ? state.sort : 'city';
+  const metaLabel = validSorts[key];
+
+  // Group by chosen field
   const groups = {};
   state.hotels.forEach(h => {
-    const g = (h[key] || '—').trim() || '—';
+    const g = (h[key] || '').trim() || '—';
     (groups[g] = groups[g] || []).push(h);
   });
-  const orderedGroups = Object.keys(groups).sort((a,b) => a.localeCompare(b, undefined, {sensitivity:'base'}));
+
+  // Group order: alphabetical (with '—' for unset placed last)
+  const orderedGroups = Object.keys(groups).sort((a, b) => {
+    if (a === '—' && b !== '—') return 1;
+    if (b === '—' && a !== '—') return -1;
+    return a.localeCompare(b, undefined, {sensitivity:'base'});
+  });
+
+  // Within each group: stayed first (by rating desc), then wishlist (alphabetical)
+  const byRatingDesc = (a, b) => {
+    const ar = (a.rating == null) ? -Infinity : Number(a.rating);
+    const br = (b.rating == null) ? -Infinity : Number(b.rating);
+    if (br !== ar) return br - ar;
+    return (a.name || '').localeCompare(b.name || '', undefined, {sensitivity:'base'});
+  };
+  const byNameAsc = (a, b) =>
+    (a.name || '').localeCompare(b.name || '', undefined, {sensitivity:'base'});
 
   let html = '';
   orderedGroups.forEach(g => {
-    const items = groups[g].slice().sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {sensitivity:'base'}));
-    const meta = key === 'brand' ? 'Brand' : 'City';
+    const all = groups[g];
+    const stayed   = all.filter(h => h.status !== 'wishlist').sort(byRatingDesc);
+    const wishlist = all.filter(h => h.status === 'wishlist').sort(byNameAsc);
     const firstWord = g.split(/\s+/)[0];
     const restWord  = g.slice(firstWord.length);
     html += `
       <div class="group-label">
         <div class="name"><em>${escapeHtml(firstWord)}</em>${escapeHtml(restWord)}</div>
         <div class="hair"></div>
-        <div class="meta">${meta} &middot; ${items.length}</div>
+        <div class="meta">${metaLabel} &middot; ${all.length}</div>
       </div>`;
-    items.forEach(h => { html += entryHTML(h, key); });
+    stayed.forEach(h => { html += entryHTML(h, key); });
+    if (wishlist.length) {
+      // If there were stayed entries above, set a divider; otherwise just a small label
+      if (stayed.length) {
+        html += `<div class="group-divider-label">To try</div>`;
+      } else {
+        html += `<div class="group-divider-label">To try</div>`;
+      }
+      wishlist.forEach(h => { html += entryHTML(h, key); });
+    }
   });
   list.innerHTML = html;
 
@@ -1154,27 +1338,31 @@ function render() {
 }
 
 function entryHTML(h, keyShown) {
-  const rating = formatRating(h.rating);
-  const showCity = keyShown !== 'city';
-  const showBrand = keyShown !== 'brand';
+  const isWish = h.status === 'wishlist';
+  // Show the two fields that aren't the active grouping key
   const metaParts = [];
-  if (showCity && h.city) metaParts.push(`<span>${escapeHtml(h.city)}</span>`);
-  if (showBrand && h.brand) metaParts.push(`<span class="hotel-brand">${escapeHtml(h.brand)}</span>`);
+  if (keyShown !== 'city'    && h.city)    metaParts.push(`<span>${escapeHtml(h.city)}</span>`);
+  if (keyShown !== 'country' && h.country) metaParts.push(`<span>${escapeHtml(h.country)}</span>`);
+  if (keyShown !== 'brand'   && h.brand)   metaParts.push(`<span class="hotel-brand">${escapeHtml(h.brand)}</span>`);
   const metaHtml = metaParts.length
     ? metaParts.join('<span class="sep"></span>')
-    : `<span>${keyShown === 'city' ? escapeHtml(h.brand||'—') : escapeHtml(h.city||'—')}</span>`;
-  const notes = h.notes ? `<div class="notes">&ldquo;${escapeHtml(h.notes)}&rdquo;</div>` : '';
+    : `<span>&nbsp;</span>`;
+  // notes: stripped of newlines for single-line clamp; CSS does the truncation/ellipsis
+  const noteOneLine = (h.notes || '').replace(/\s*\n+\s*/g, ' ').trim();
+  const notes = noteOneLine ? `<div class="notes">&ldquo;${escapeHtml(noteOneLine)}&rdquo;</div>` : '';
+
+  const rightSide = isWish
+    ? `<div class="rating"><div class="n">&#9826;</div><div class="of">To&nbsp;try</div></div>`
+    : `<div class="rating"><div class="n">${formatRating(h.rating)}</div><div class="of">/ 5</div></div>`;
+
   return `
-    <article class="entry" data-id="${h.id}">
+    <article class="entry${isWish ? ' is-wishlist' : ''}" data-id="${h.id}">
       <div>
         <h3 class="hotel-name">${escapeHtml(h.name||'Untitled')}</h3>
         <div class="hotel-meta">${metaHtml}</div>
         ${notes}
       </div>
-      <div class="rating">
-        <div class="n">${rating}</div>
-        <div class="of">/ 5</div>
-      </div>
+      ${rightSide}
     </article>`;
 }
 
@@ -1188,14 +1376,17 @@ function openDetail(id) {
   const h = state.hotels.find(x => x.id === id);
   if (!h) return;
   const rating = formatRating(h.rating);
+  const isWish = h.status === 'wishlist';
+  const eyebrowParts = [h.city, h.country].filter(Boolean).map(escapeHtml);
+  if (isWish) eyebrowParts.unshift('To try');
   $('#detailBody').innerHTML = `
-    <div class="detail">
-      <div class="city-eyebrow">${escapeHtml(h.city || '—')}</div>
-      <h2 class="hero-name">${emphasizeFirstWord(h.name||'Untitled')}</h2>
+    <div class="detail${isWish ? ' is-wishlist-detail' : ''}">
+      <div class="city-eyebrow">${eyebrowParts.length ? eyebrowParts.join(' &middot; ') : '—'}</div>
+      <h2 class="hero-name" style="${isWish ? 'font-style:italic;color:var(--muted-fg);' : ''}">${emphasizeFirstWord(h.name||'Untitled')}</h2>
       ${h.brand ? `<div class="brand-line">${escapeHtml(h.brand)}</div>` : ''}
       <div class="rating-big">
-        <div class="n">${rating}</div>
-        <div class="label">Out of 5.00</div>
+        <div class="n" style="${isWish ? 'color:var(--gold);font-style:italic;' : ''}">${isWish ? '&#9826;' : rating}</div>
+        <div class="label">${isWish ? 'On the list to try' : 'Out of 5.00'}</div>
       </div>
       ${h.notes ? `<blockquote class="notes-big">${escapeHtml(h.notes)}</blockquote>` : ''}
       <div class="detail-actions">
@@ -1221,17 +1412,36 @@ function openEdit(id=null) {
   state.editingId = id;
   const h = id ? state.hotels.find(x => x.id === id) : null;
   $('#editTitle').innerHTML = h ? 'Edit <em>entry</em>' : 'New <em>entry</em>';
-  $('#f-city').value   = h?.city   || '';
-  $('#f-name').value   = h?.name   || '';
-  $('#f-brand').value  = h?.brand  || '';
-  $('#f-rating').value = h?.rating != null ? h.rating : '';
-  $('#f-notes').value  = h?.notes  || '';
+  $('#f-city').value    = h?.city    || '';
+  $('#f-country').value = h?.country || '';
+  $('#f-name').value    = h?.name    || '';
+  $('#f-brand').value   = h?.brand   || '';
+  $('#f-rating').value  = h?.rating != null ? h.rating : '';
+  $('#f-notes').value   = h?.notes   || '';
+  setStatus(h?.status === 'wishlist' ? 'wishlist' : 'stayed');
   $('#deleteBtn').style.display = h ? 'inline-flex' : 'none';
   renderStars(h?.rating);
-  renderBrandDatalist();
+  renderDatalists();
   openSheet(editSheet);
   setTimeout(() => $('#f-city').focus(), 300);
 }
+
+function setStatus(val) {
+  const seg = $('#statusSeg');
+  seg.dataset.val = val;
+  seg.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.val === val));
+  const ratingField = $('#ratingField');
+  if (val === 'wishlist') {
+    ratingField.classList.add('is-disabled');
+  } else {
+    ratingField.classList.remove('is-disabled');
+  }
+}
+$('#statusSeg').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-val]');
+  if (!btn) return;
+  setStatus(btn.dataset.val);
+});
 
 function renderStars(rating) {
   const r = Math.max(0, Math.min(5, Number(rating) || 0));
@@ -1250,9 +1460,10 @@ $('#f-rating').addEventListener('input', e => renderStars(e.target.value));
 
 $('#editForm').addEventListener('submit', e => {
   e.preventDefault();
+  const status = $('#statusSeg').dataset.val === 'wishlist' ? 'wishlist' : 'stayed';
   const rawRating = $('#f-rating').value.trim();
   let rating = null;
-  if (rawRating !== '') {
+  if (status === 'stayed' && rawRating !== '') {
     const n = Number(rawRating);
     if (!isFinite(n) || n < 0 || n > 5) {
       showToast('Rating must be 0–5', 'err'); return;
@@ -1261,11 +1472,13 @@ $('#editForm').addEventListener('submit', e => {
   }
   const entry = {
     id: state.editingId || uid(),
-    city:  $('#f-city').value.trim(),
-    name:  $('#f-name').value.trim(),
-    brand: normalizeBrand($('#f-brand').value),
-    rating,
-    notes: $('#f-notes').value.trim(),
+    status,
+    city:    $('#f-city').value.trim(),
+    country: $('#f-country').value.trim(),
+    name:    $('#f-name').value.trim(),
+    brand:   normalizeBrand($('#f-brand').value),
+    rating,                           // null for wishlist (no visit yet)
+    notes:   $('#f-notes').value.trim(),
     updated: Date.now(),
   };
   if (!entry.city || !entry.name) {
@@ -1502,19 +1715,20 @@ function ymd() {
 
 function applyImported(payload) {
   if (!payload || !Array.isArray(payload.hotels)) throw new Error('Invalid data');
-  // Basic validation/normalization
   const hotels = payload.hotels.map(h => ({
-    id: h.id || uid(),
-    city: String(h.city||'').trim(),
-    name: String(h.name||'').trim(),
-    brand: String(h.brand||'').trim(),
-    rating: h.rating == null || h.rating === '' ? null : Math.round(Number(h.rating)*100)/100,
-    notes: String(h.notes||''),
-    updated: Number(h.updated||Date.now()),
+    id:      h.id || uid(),
+    status:  h.status === 'wishlist' ? 'wishlist' : 'stayed',
+    city:    String(h.city    || '').trim(),
+    country: String(h.country || '').trim(),
+    name:    String(h.name    || '').trim(),
+    brand:   String(h.brand   || '').trim(),
+    rating:  h.rating == null || h.rating === '' ? null : Math.round(Number(h.rating)*100)/100,
+    notes:   String(h.notes   || ''),
+    updated: Number(h.updated || Date.now()),
   }));
   state.hotels = hotels;
   save(LS.HOTELS, state.hotels);
-  updateBrands();
+  updateAutocompleteLists();
   render();
 }
 
@@ -1554,19 +1768,26 @@ $('#exportXlsxBtn').addEventListener('click', () => {
   if (typeof XLSX === 'undefined') { showToast('XLSX library not loaded', 'err'); return; }
   const rows = state.hotels
     .slice()
-    .sort((a,b) => (a.city||'').localeCompare(b.city||'') || (a.name||'').localeCompare(b.name||''))
+    .sort((a,b) =>
+      (a.country||'').localeCompare(b.country||'', undefined, {sensitivity:'base'}) ||
+      (a.city||'').localeCompare(b.city||'',       undefined, {sensitivity:'base'}) ||
+      ((a.status==='wishlist') - (b.status==='wishlist')) ||  // stayed before wishlist
+      ((b.rating==null?-Infinity:Number(b.rating)) - (a.rating==null?-Infinity:Number(a.rating))) ||
+      (a.name||'').localeCompare(b.name||'',       undefined, {sensitivity:'base'}))
     .map(h => ({
-      City: h.city || '',
-      'Hotel Name': h.name || '',
-      Brand: h.brand || '',
+      Status:        h.status === 'wishlist' ? 'To try' : 'Stayed',
+      Country:       h.country || '',
+      City:          h.city    || '',
+      'Hotel Name':  h.name    || '',
+      Brand:         h.brand   || '',
       'Rating (/5)': h.rating == null ? '' : Number(h.rating),
-      Notes: h.notes || '',
+      Notes:         h.notes   || '',
       'Last Updated': h.updated ? new Date(h.updated).toISOString().slice(0,19).replace('T',' ') : '',
     }));
-  const ws = XLSX.utils.json_to_sheet(rows, {header:['City','Hotel Name','Brand','Rating (/5)','Notes','Last Updated']});
-  // Column widths for readability
+  const headers = ['Status','Country','City','Hotel Name','Brand','Rating (/5)','Notes','Last Updated'];
+  const ws = XLSX.utils.json_to_sheet(rows, {header: headers});
   ws['!cols'] = [
-    {wch:22},{wch:32},{wch:22},{wch:12},{wch:52},{wch:20}
+    {wch:10},{wch:18},{wch:22},{wch:32},{wch:22},{wch:12},{wch:52},{wch:20}
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Hotels');
@@ -1577,10 +1798,15 @@ $('#exportXlsxBtn').addEventListener('click', () => {
 /* Wipe */
 $('#wipeBtn').addEventListener('click', () => {
   if (!confirm('Erase all local entries? This cannot be undone (on this device).')) return;
-  state.hotels = [];
-  state.brands = [];
-  save(LS.HOTELS, state.hotels);
-  save(LS.BRANDS, state.brands);
+  state.hotels    = [];
+  state.brands    = [];
+  state.cities    = [];
+  state.countries = [];
+  save(LS.HOTELS,    state.hotels);
+  save(LS.BRANDS,    state.brands);
+  save(LS.CITIES,    state.cities);
+  save(LS.COUNTRIES, state.countries);
+  renderDatalists();
   render();
   showToast('Local data erased');
 });
@@ -1641,8 +1867,8 @@ $('#forceUpdateBtn').addEventListener('click', () => {
  * Boot
  * ============================================================ */
 function init() {
-  renderBrandDatalist();
-  updateBrands();
+  renderDatalists();
+  updateAutocompleteLists();
   render();
   refreshSyncBadge();
 
