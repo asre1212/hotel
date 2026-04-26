@@ -310,10 +310,9 @@
     margin-top: 6px;
     font-weight: 400;
     padding-right: 8px;
-    /* clamp to a single visible line */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* JS truncates to ~6 words; allow natural wrap if it ever needs to */
+    word-break: normal;
+    overflow-wrap: break-word;
   }
 
   .rating {
@@ -441,6 +440,65 @@
 
   .field.rating-field { transition: opacity .3s var(--ease), max-height .4s var(--ease); }
   .field.rating-field.is-disabled { opacity: 0.35; pointer-events: none; }
+
+  /* Setting field with a saved-status pill + clear (×) button */
+  .field-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .field-head label {
+    margin: 0;
+  }
+  .save-pill {
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-muted);
+    color: var(--muted-fg);
+    transition: background .25s var(--ease), color .25s var(--ease), opacity .25s var(--ease);
+  }
+  .save-pill.is-saved {
+    background: rgba(184,150,90,0.16);
+    color: var(--gold-ink);
+  }
+  .save-pill.is-flash {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .input-wrap { position: relative; }
+  .input-wrap input {
+    padding-right: 34px !important;
+  }
+  .input-wrap .clear-x {
+    position: absolute;
+    right: 0;
+    top: 6px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--muted-fg);
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity .25s var(--ease), background .25s var(--ease), transform .25s var(--ease);
+  }
+  .input-wrap.has-value .clear-x {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .input-wrap .clear-x:active {
+    background: var(--surface-muted);
+    color: var(--ink);
+  }
+  .input-wrap .clear-x svg { width: 14px; height: 14px; }
 
   /* ---------- Empty state ---------- */
   .empty {
@@ -1032,12 +1090,28 @@
       <p>Sync uses a private GitHub Gist. Create a Personal Access Token with the <code>gist</code> scope at <em>github.com/settings/tokens</em>, paste it below, and press <strong>Sync now</strong>. A new gist is created on first sync; afterwards, the same token on another device pulls your data down.</p>
 
       <div class="field">
-        <label for="s-token">GitHub Personal Access Token (gist scope)</label>
-        <input type="text" id="s-token" placeholder="ghp_..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <div class="field-head">
+          <label for="s-token">GitHub Personal Access Token (gist scope)</label>
+          <span class="save-pill" data-pill="s-token">Empty</span>
+        </div>
+        <div class="input-wrap" data-saved-input>
+          <input type="text" id="s-token" placeholder="ghp_..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button type="button" class="clear-x" data-clear-for="s-token" aria-label="Clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
       </div>
       <div class="field">
-        <label for="s-gist">Gist ID (optional — auto-filled after first sync)</label>
-        <input type="text" id="s-gist" placeholder="(leave blank on a new device if using existing gist, paste its ID)" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <div class="field-head">
+          <label for="s-gist">Gist ID (optional — auto-filled after first sync)</label>
+          <span class="save-pill" data-pill="s-gist">Empty</span>
+        </div>
+        <div class="input-wrap" data-saved-input>
+          <input type="text" id="s-gist" placeholder="(leave blank on a new device if using existing gist, paste its ID)" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button type="button" class="clear-x" data-clear-for="s-gist" aria-label="Clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
         <div class="hint">On a new device: paste an existing Gist ID, then press <strong>Pull from cloud</strong>.</div>
       </div>
 
@@ -1067,10 +1141,18 @@
 
     <div class="settings-section">
       <h3>App <em>updates</em></h3>
-      <p>When you push a new version to GitHub, Hotel Journal can force-refresh its cache. Paste the <strong>raw</strong> URL to your <code>index.html</code> (https://raw.githubusercontent.com/&hellip;/main/index.html).</p>
+      <p>When you push a new version to GitHub, Hotel Journal can force-refresh its cache. Paste the <strong>raw</strong> URL to your <code>index.html</code> (https://raw.githubusercontent.com/&hellip;/main/index.html). It saves automatically &mdash; tap the &times; to clear and enter a new one.</p>
       <div class="field">
-        <label for="s-rawurl">Raw index.html URL</label>
-        <input type="text" id="s-rawurl" placeholder="https://raw.githubusercontent.com/username/hotel-journal/main/index.html" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <div class="field-head">
+          <label for="s-rawurl">Raw index.html URL</label>
+          <span class="save-pill" data-pill="s-rawurl">Empty</span>
+        </div>
+        <div class="input-wrap" data-saved-input>
+          <input type="text" id="s-rawurl" placeholder="https://raw.githubusercontent.com/username/hotel-journal/main/index.html" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <button type="button" class="clear-x" data-clear-for="s-rawurl" aria-label="Clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
       </div>
       <div class="row">
         <button class="btn outline" id="checkUpdateBtn">Check for update</button>
@@ -1120,7 +1202,7 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.2.0";
+const VERSION = "1.2.2";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1347,9 +1429,15 @@ function entryHTML(h, keyShown) {
   const metaHtml = metaParts.length
     ? metaParts.join('<span class="sep"></span>')
     : `<span>&nbsp;</span>`;
-  // notes: stripped of newlines for single-line clamp; CSS does the truncation/ellipsis
-  const noteOneLine = (h.notes || '').replace(/\s*\n+\s*/g, ' ').trim();
-  const notes = noteOneLine ? `<div class="notes">&ldquo;${escapeHtml(noteOneLine)}&rdquo;</div>` : '';
+  // Notes preview: collapse whitespace, then truncate to first 6 words with an ellipsis.
+  // Tap the entry to see the full notes in the detail sheet.
+  const fullNote = (h.notes || '').replace(/\s+/g, ' ').trim();
+  const words = fullNote ? fullNote.split(' ') : [];
+  const MAX_WORDS = 6;
+  const previewNote = words.length > MAX_WORDS
+    ? words.slice(0, MAX_WORDS).join(' ') + '…'      // …
+    : fullNote;
+  const notes = previewNote ? `<div class="notes">&ldquo;${escapeHtml(previewNote)}&rdquo;</div>` : '';
 
   const rightSide = isWish
     ? `<div class="rating"><div class="n">&#9826;</div><div class="of">To&nbsp;try</div></div>`
@@ -1516,9 +1604,16 @@ function deleteHotel(id) {
 /* ---------- Top-level buttons ---------- */
 $('#addBtn').addEventListener('click', () => openEdit());
 $('#openSettings').addEventListener('click', () => {
-  $('#s-token').value  = load(LS.TOKEN, '');
-  $('#s-gist').value   = load(LS.GIST, '');
-  $('#s-rawurl').value = load(LS.RAWURL, '');
+  // Refresh fields from storage in case anything changed (e.g. gist auto-filled after sync)
+  if (typeof persistedFields !== 'undefined') {
+    persistedFields.forEach(({id, key}) => {
+      const v = load(key, '');
+      const el = $('#'+id);
+      el.value = v;
+      refreshSavedPill(id, v);
+      refreshClearVisibility(el);
+    });
+  }
   openSheet(settingsSheet);
 });
 
@@ -1603,6 +1698,8 @@ async function pushToCloud() {
       });
       save(LS.GIST, gist.id);
       $('#s-gist').value = gist.id;
+      refreshSavedPill('s-gist', gist.id);
+      refreshClearVisibility($('#s-gist'));
     }
     refreshSyncBadge();
     showToast('Synced to cloud');
@@ -1681,12 +1778,76 @@ $('#syncNowBtn').addEventListener('click', syncNow);
 $('#pushBtn').addEventListener('click', pushToCloud);
 $('#pullBtn').addEventListener('click', pullFromCloud);
 
-/* Persist settings on blur */
-['s-token','s-gist','s-rawurl'].forEach(id => {
-  const key = id === 's-token' ? LS.TOKEN : id === 's-gist' ? LS.GIST : LS.RAWURL;
-  $('#'+id).addEventListener('change', e => {
-    save(key, e.target.value.trim());
+/* ---------- Live-persisted settings (token / gist / raw URL) ---------- */
+const persistedFields = [
+  { id: 's-token',  key: LS.TOKEN  },
+  { id: 's-gist',   key: LS.GIST   },
+  { id: 's-rawurl', key: LS.RAWURL },
+];
+
+function refreshSavedPill(id, val) {
+  const pill = document.querySelector(`[data-pill="${id}"]`);
+  if (!pill) return;
+  if (val) {
+    pill.textContent = 'Saved';
+    pill.classList.add('is-saved');
+  } else {
+    pill.textContent = 'Empty';
+    pill.classList.remove('is-saved');
+  }
+}
+function flashSaved(id) {
+  const pill = document.querySelector(`[data-pill="${id}"]`);
+  if (!pill) return;
+  pill.classList.add('is-flash');
+  pill.textContent = 'Saved';
+  clearTimeout(pill._t);
+  pill._t = setTimeout(() => {
+    pill.classList.remove('is-flash');
+    refreshSavedPill(id, $('#'+id).value.trim());
+  }, 700);
+}
+function refreshClearVisibility(input) {
+  const wrap = input.closest('.input-wrap');
+  if (!wrap) return;
+  wrap.classList.toggle('has-value', input.value.trim() !== '');
+}
+
+persistedFields.forEach(({id, key}) => {
+  const input = $('#'+id);
+  // Initial state from storage
+  input.value = load(key, '');
+  refreshSavedPill(id, input.value.trim());
+  refreshClearVisibility(input);
+
+  // Live save (debounced)
+  let t;
+  input.addEventListener('input', () => {
+    refreshClearVisibility(input);
+    clearTimeout(t);
+    t = setTimeout(() => {
+      const v = input.value.trim();
+      save(key, v);
+      flashSaved(id);
+      refreshSyncBadge();
+    }, 250);
+  });
+});
+
+// Clear (×) buttons
+document.querySelectorAll('[data-clear-for]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.clearFor;
+    const input = $('#'+id);
+    if (!input) return;
+    input.value = '';
+    const key = persistedFields.find(f => f.id === id)?.key;
+    if (key) save(key, '');
+    refreshSavedPill(id, '');
+    refreshClearVisibility(input);
     refreshSyncBadge();
+    showToast('Cleared');
+    input.focus();
   });
 });
 
