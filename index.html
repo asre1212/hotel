@@ -478,6 +478,7 @@
     box-shadow: var(--shadow-sm);
   }
   .seg[data-val="wishlist"] .seg-slider { transform: translateX(100%); }
+  .seg[data-val="off"]      .seg-slider { transform: translateX(100%); }
   .seg button {
     flex: 1;
     position: relative; z-index: 1;
@@ -1229,7 +1230,7 @@
       </div>
 
       <div class="field">
-        <label>Photos <span style="text-transform:none;letter-spacing:0;">(stored on this device only)</span></label>
+        <label>Photos</label>
         <div class="photo-grid" id="photoGrid">
           <button type="button" class="photo-add" id="photoAddBtn" aria-label="Add photo">+</button>
         </div>
@@ -1293,6 +1294,19 @@
         <div class="hint">On a new device: paste an existing Gist ID, then press <strong>Pull from cloud</strong>.</div>
       </div>
 
+      <div class="field">
+        <div class="field-head">
+          <label>Photo package</label>
+          <span class="save-pill is-saved" id="photoSyncPill">On</span>
+        </div>
+        <div class="seg" id="photoSyncSeg" data-val="on">
+          <span class="seg-slider"></span>
+          <button type="button" data-val="on" class="active">Sync photos</button>
+          <button type="button" data-val="off">Device only</button>
+        </div>
+        <div class="hint">Photos travel in their own private gist, separate from the core data file, and only new or missing photos move on each sync &mdash; so syncing stays quick.</div>
+      </div>
+
       <div class="row">
         <button class="btn primary" id="syncNowBtn">Sync now</button>
         <button class="btn outline" id="pullBtn">Pull from cloud</button>
@@ -1306,7 +1320,7 @@
 
     <div class="settings-section">
       <h3>Import &amp; <em>export</em></h3>
-      <p>JSON is for moving everything between phones. XLSX is for spreadsheet review. Photos stay on this device &mdash; they are not included in exports or cloud sync, which keeps both fast.</p>
+      <p>JSON is for moving everything between phones. XLSX is for spreadsheet review. Neither export includes photo files &mdash; photos travel via the photo package in cloud sync instead.</p>
       <div class="row">
         <button class="btn outline" id="exportJsonBtn">Export JSON</button>
         <button class="btn outline" id="importJsonBtn">Import JSON</button>
@@ -1377,7 +1391,7 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.4.0";
+const VERSION = "1.5.0";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1389,6 +1403,10 @@ const LS = {
   TOKEN:     'hj.gh.token.v1',
   GIST:      'hj.gh.gist.v1',
   RAWURL:    'hj.rawurl.v1',
+  PHOTOGIST:  'hj.gh.photogist.v1',  // separate gist holding the photo package
+  GHUSER:     'hj.gh.user.v1',       // gist owner login, for raw-file downloads
+  PHOTOINDEX: 'hj.photoindex.v1',    // ids known to be uploaded to the photo package
+  PHOTOSYNC:  'hj.photosync.v1',     // 'on' | 'off'
 };
 
 /* ---------- State ---------- */
@@ -1450,6 +1468,33 @@ function photoDeleteMany(ids) {
 }
 function photoClearAll() {
   return photoTx('readwrite', s => s.clear()).catch(()=>{});
+}
+
+function photoAllIds() {
+  return photoDB().then(db => new Promise((resolve, reject) => {
+    const req = db.transaction('photos').objectStore('photos').getAllKeys();
+    req.onsuccess = () => resolve(req.result.map(String));
+    req.onerror = () => reject(req.error);
+  })).catch(() => []);
+}
+function referencedPhotoIds() {
+  const s = new Set();
+  state.hotels.forEach(h => (h.photos || []).forEach(id => s.add(id)));
+  return s;
+}
+function blobToB64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1]);
+    r.onerror = () => reject(r.error || new Error('Read failed'));
+    r.readAsDataURL(blob);
+  });
+}
+function b64ToBlob(b64, type = 'image/jpeg') {
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type });
 }
 
 /* Downscale + JPEG-compress an image file; returns {full, thumb} blobs. */
@@ -2140,17 +2185,166 @@ async function ghFetch(url, opts={}) {
   return res.json();
 }
 
+/* ============================================================
+ * Photo package sync
+ * Photos live in their OWN private gist ("photo package"), one
+ * small JSON file per photo, so the core data file stays tiny.
+ * Sync is incremental: only missing photos move in either
+ * direction, and photos of deleted entries are pruned on push.
+ * ============================================================ */
+function photoSyncEnabled() { return load(LS.PHOTOSYNC, 'on') !== 'off'; }
+
+async function pushPhotos() {
+  const refIds   = referencedPhotoIds();
+  const localIds = new Set(await photoAllIds());
+  const index    = new Set(load(LS.PHOTOINDEX, []));
+  let gistId     = load(LS.PHOTOGIST, '');
+
+  const toUpload = [...refIds].filter(id => localIds.has(id) && !index.has(id));
+  const toPrune  = gistId ? [...index].filter(id => !refIds.has(id)) : [];
+  if (!toUpload.length && !toPrune.length) return;
+
+  // Encode uploads into batches so each API call stays a modest size
+  const batches = [];
+  let cur = {}, curBytes = 0;
+  for (const id of toUpload) {
+    const rec = await photoGet(id).catch(() => null);
+    if (!rec) continue;
+    const [full, thumb] = await Promise.all([blobToB64(rec.full), blobToB64(rec.thumb)]);
+    const content = JSON.stringify({ id, full, thumb });
+    cur[id + '.json'] = { content };
+    curBytes += content.length;
+    if (curBytes > 1.5e6 || Object.keys(cur).length >= 6) {
+      batches.push(cur); cur = {}; curBytes = 0;
+    }
+  }
+  if (Object.keys(cur).length) batches.push(cur);
+
+  const pruneFiles = {};
+  toPrune.forEach(id => { pruneFiles[id + '.json'] = null; });
+
+  let uploaded = 0;
+  const totalUp = batches.reduce((a, b) => a + Object.keys(b).length, 0);
+  for (let i = 0; i < batches.length; i++) {
+    // Piggyback prunes on the first PATCH (deletes need an existing gist)
+    const files = (i === 0 && gistId) ? { ...batches[i], ...pruneFiles } : batches[i];
+    let gist;
+    if (gistId) {
+      gist = await ghFetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ files, description: 'Hotel Journal photos' }),
+      });
+    } else {
+      gist = await ghFetch('https://api.github.com/gists', {
+        method: 'POST',
+        body: JSON.stringify({ description: 'Hotel Journal photos', public: false, files }),
+      });
+      gistId = gist.id;
+      save(LS.PHOTOGIST, gistId);
+    }
+    if (gist.owner?.login) save(LS.GHUSER, gist.owner.login);
+    Object.keys(batches[i]).forEach(f => index.add(f.replace(/\.json$/, '')));
+    uploaded += Object.keys(batches[i]).length;
+    if (totalUp > 6) showToast(`Photo package: ${uploaded}/${totalUp} uploaded…`);
+  }
+  // Prune-only run (nothing to upload)
+  if (!batches.length && toPrune.length) {
+    await ghFetch(`https://api.github.com/gists/${gistId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ files: pruneFiles }),
+    });
+  }
+  toPrune.forEach(id => index.delete(id));
+  save(LS.PHOTOINDEX, [...index]);
+}
+
+async function pullPhotos() {
+  const gistId = load(LS.PHOTOGIST, '');
+  if (!gistId) return;
+  const owner    = load(LS.GHUSER, '');
+  const index    = new Set(load(LS.PHOTOINDEX, []));
+  const refIds   = referencedPhotoIds();
+  const localIds = new Set(await photoAllIds());
+  const toGet = [...refIds].filter(id => index.has(id) && !localIds.has(id));
+  if (!toGet.length) return;
+
+  showToast(`Downloading ${toGet.length} photo${toGet.length > 1 ? 's' : ''}…`);
+  let gistData = null; // lazy API fallback if raw URLs don't pan out
+  async function fileText(id) {
+    if (owner) {
+      try {
+        const res = await fetch(`https://gist.githubusercontent.com/${owner}/${gistId}/raw/${id}.json`, { cache: 'no-store' });
+        if (res.ok) return await res.text();
+      } catch (e) { /* fall through to API */ }
+    }
+    if (!gistData) {
+      gistData = await ghFetch(`https://api.github.com/gists/${gistId}`);
+      if (gistData.owner?.login) save(LS.GHUSER, gistData.owner.login);
+    }
+    const f = gistData.files[id + '.json'];
+    if (!f) return null;
+    if (f.truncated && f.raw_url) return await (await fetch(f.raw_url)).text();
+    return f.content;
+  }
+
+  let got = 0;
+  for (const id of toGet) {
+    try {
+      const text = await fileText(id);
+      if (!text) continue;
+      const data = JSON.parse(text);
+      if (!data.full) continue;
+      await photoPut({
+        id,
+        full:  b64ToBlob(data.full),
+        thumb: data.thumb ? b64ToBlob(data.thumb) : b64ToBlob(data.full),
+        created: Date.now(),
+      });
+      got++;
+    } catch (e) { console.error('Photo download failed:', id, e); }
+  }
+  if (got) {
+    showToast(`${got} photo${got > 1 ? 's' : ''} downloaded`);
+    render();
+  }
+}
+
+/* After pulling core data: adopt the photo-package pointer it carries,
+   then fetch any photos we're missing (in the background). */
+function handlePulledPhotoData(payload) {
+  if (payload.photoGist?.id) {
+    save(LS.PHOTOGIST, String(payload.photoGist.id));
+    if (payload.photoGist.owner) save(LS.GHUSER, String(payload.photoGist.owner));
+  }
+  if (Array.isArray(payload.photoIndex)) {
+    save(LS.PHOTOINDEX, payload.photoIndex.filter(x => typeof x === 'string'));
+  }
+  if (photoSyncEnabled()) {
+    pullPhotos().catch(e => { console.error(e); showToast('Photo download failed', 'err', 3000); });
+  }
+}
+
 async function pushToCloud() {
   const token = $('#s-token').value.trim();
   if (!token) { showToast('Enter a GitHub token first', 'err'); return; }
   save(LS.TOKEN, token);
   setSyncState('syncing', 'Pushing…');
 
+  // Photo package first, so the core payload carries a fresh index.
+  // A photo failure never blocks the core data push.
+  if (photoSyncEnabled()) {
+    try { await pushPhotos(); }
+    catch(e) { console.error(e); showToast('Photo package: ' + e.message, 'err', 3200); }
+  }
+
+  const photoGistId = load(LS.PHOTOGIST, '');
   const payload = JSON.stringify({
     version: VERSION,
     updated: Date.now(),
     hotels: state.hotels,
     brands: state.brands,
+    photoGist: photoGistId ? { id: photoGistId, owner: load(LS.GHUSER, '') } : null,
+    photoIndex: load(LS.PHOTOINDEX, []),
   }, null, 2);
 
   const file = { 'hotel-journal-data.json': { content: payload } };
@@ -2204,6 +2398,8 @@ async function pullFromCloud() {
     }
     const payload = JSON.parse(content);
     applyImported(payload);
+    if (gist.owner?.login && !load(LS.GHUSER, '')) save(LS.GHUSER, gist.owner.login);
+    handlePulledPhotoData(payload);
     refreshSyncBadge();
     showToast('Pulled from cloud');
   } catch(e) {
@@ -2234,6 +2430,8 @@ async function syncNow() {
         const localTs = Math.max(0, ...state.hotels.map(h => h.updated||0));
         if (remoteTs > localTs) {
           applyImported(remote);
+          if (gist.owner?.login && !load(LS.GHUSER, '')) save(LS.GHUSER, gist.owner.login);
+          handlePulledPhotoData(remote);
           showToast('Pulled newer cloud copy');
           refreshSyncBadge();
           return;
@@ -2253,6 +2451,23 @@ async function syncNow() {
 $('#syncNowBtn').addEventListener('click', syncNow);
 $('#pushBtn').addEventListener('click', pushToCloud);
 $('#pullBtn').addEventListener('click', pullFromCloud);
+
+/* Photo package on/off toggle */
+function setPhotoSyncSeg(val) {
+  const seg = $('#photoSyncSeg');
+  seg.dataset.val = val;
+  seg.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.val === val));
+  const pill = $('#photoSyncPill');
+  pill.textContent = val === 'on' ? 'On' : 'Off';
+  pill.classList.toggle('is-saved', val === 'on');
+}
+$('#photoSyncSeg').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-val]');
+  if (!btn) return;
+  save(LS.PHOTOSYNC, btn.dataset.val);
+  setPhotoSyncSeg(btn.dataset.val);
+});
+setPhotoSyncSeg(load(LS.PHOTOSYNC, 'on'));
 
 /* ---------- Live-persisted settings (token / gist / raw URL) ---------- */
 const persistedFields = [
