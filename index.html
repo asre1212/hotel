@@ -92,69 +92,53 @@
     padding-bottom: calc(120px + var(--safe-bottom));
   }
 
-  /* ---------- Masthead ---------- */
+  /* ---------- Masthead (compact single row) ---------- */
   .masthead {
-    padding: 32px 24px 20px;
-    text-align: center;
-    position: relative;
-  }
-  .masthead .eyebrow {
-    font-family: var(--sans);
-    font-size: 10px;
-    letter-spacing: 0.42em;
-    text-transform: uppercase;
-    color: var(--muted-fg);
-    font-weight: 500;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 12px 8px 20px;
+    border-bottom: 1px solid var(--hairline-soft);
   }
   .masthead h1 {
     font-family: var(--serif);
     font-weight: 500;
-    font-size: clamp(38px, 10vw, 52px);
-    line-height: 0.95;
-    margin: 0 0 4px;
+    font-size: 24px;
+    line-height: 1;
+    margin: 0;
     letter-spacing: -0.01em;
+    white-space: nowrap;
   }
   .masthead h1 em {
     font-style: italic;
     font-weight: 400;
     color: var(--gold-ink);
   }
-  .masthead .issue {
-    margin-top: 10px;
-    font-family: var(--sans);
-    font-size: 10px;
-    color: var(--muted-fg);
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-  }
-  .masthead .rule {
-    height: 1px; width: 56px;
-    background: var(--gold); opacity: 0.7;
-    margin: 14px auto 0;
+  .mast-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
   }
   .settings-btn {
-    position: absolute;
-    top: calc(20px + var(--safe-top));
-    right: 20px;
-    width: 40px; height: 40px;
+    width: 36px; height: 36px;
     border-radius: 50%;
     display: grid; place-items: center;
     color: var(--ink-soft);
+    flex: 0 0 auto;
     transition: background .3s var(--ease);
   }
   .settings-btn:active { background: var(--surface-muted); }
-  .settings-btn svg { width: 18px; height: 18px; }
+  .settings-btn svg { width: 17px; height: 17px; }
 
   .sync-badge {
-    position: absolute;
-    top: calc(24px + var(--safe-top));
-    left: 24px;
-    font-size: 9px; letter-spacing: 0.32em;
+    font-size: 9px; letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted-fg);
     font-weight: 500;
     display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
   }
   .sync-badge .dot {
     width: 6px; height: 6px; border-radius: 50%;
@@ -173,23 +157,28 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 24px 8px;
-    gap: 16px;
+    padding: 10px 20px 4px;
+    gap: 12px;
   }
   .count {
     font-family: var(--serif);
     font-style: italic;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--muted-fg);
     font-weight: 400;
+    white-space: nowrap;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .count strong {
     font-style: normal;
     font-family: var(--sans);
     color: var(--ink);
     font-weight: 500;
-    margin-right: 4px;
-    font-size: 13px;
+    margin-right: 3px;
+    font-size: 12px;
   }
 
   .sort-toggle {
@@ -198,16 +187,19 @@
     border-radius: 999px;
     padding: 3px;
     position: relative;
+    flex: 0 0 auto;
+    max-width: 100%;
   }
   .sort-toggle button {
     position: relative;
     z-index: 1;
-    padding: 7px 14px;
+    padding: 6px 11px;
     font-size: 10px;
     font-weight: 500;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted-fg);
+    white-space: nowrap;
     transition: color .3s var(--ease);
     cursor: pointer;
   }
@@ -228,14 +220,14 @@
 
   /* ---------- Section labels (group headers) ---------- */
   .group-label {
-    padding: 28px 24px 10px;
+    padding: 18px 20px 6px;
     display: flex;
     align-items: baseline;
-    gap: 14px;
+    gap: 12px;
   }
   .group-label .name {
     font-family: var(--serif);
-    font-size: 26px;
+    font-size: 19px;
     font-weight: 500;
     letter-spacing: -0.005em;
   }
@@ -246,10 +238,11 @@
   }
   .group-label .meta {
     font-size: 9px;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted-fg);
     font-weight: 500;
+    white-space: nowrap;
   }
   .group-label .hair {
     flex: 1;
@@ -260,11 +253,11 @@
 
   /* ---------- Hotel entries ---------- */
   .entry {
-    padding: 18px 24px 22px;
+    padding: 12px 20px 14px;
     border-top: 1px solid var(--hairline-soft);
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 12px 20px;
+    gap: 8px 16px;
     position: relative;
     cursor: pointer;
     transition: background .3s var(--ease), padding .5s var(--ease);
@@ -278,7 +271,7 @@
 
   .entry .hotel-name {
     font-family: var(--serif);
-    font-size: 22px;
+    font-size: 18px;
     line-height: 1.15;
     font-weight: 500;
     letter-spacing: -0.005em;
@@ -287,12 +280,13 @@
   .entry .hotel-meta {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 10px;
-    letter-spacing: 0.28em;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted-fg);
-    margin-top: 6px;
+    margin-top: 4px;
     font-weight: 500;
   }
   .entry .hotel-meta .sep {
@@ -300,14 +294,18 @@
     background: var(--hairline);
   }
   .entry .hotel-brand { color: var(--gold-ink); }
+  .entry .photo-flag {
+    color: var(--gold-ink);
+    letter-spacing: 0.06em;
+  }
   .entry .notes {
     grid-column: 1 / -1;
     font-family: var(--serif);
     font-style: italic;
-    font-size: 15px;
-    line-height: 1.45;
+    font-size: 13.5px;
+    line-height: 1.4;
     color: var(--ink-soft);
-    margin-top: 6px;
+    margin-top: 2px;
     font-weight: 400;
     padding-right: 8px;
     /* JS truncates to ~6 words; allow natural wrap if it ever needs to */
@@ -320,22 +318,22 @@
     flex-direction: column;
     align-items: flex-end;
     justify-content: flex-start;
-    min-width: 64px;
+    min-width: 48px;
     padding-top: 2px;
   }
   .rating .n {
     font-family: var(--serif);
-    font-size: 32px;
+    font-size: 23px;
     line-height: 1;
     font-weight: 500;
     letter-spacing: -0.02em;
   }
   .rating .of {
-    font-size: 9px;
-    letter-spacing: 0.32em;
+    font-size: 8.5px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted-fg);
-    margin-top: 4px;
+    margin-top: 3px;
     font-weight: 500;
   }
 
@@ -364,7 +362,7 @@
   }
   .entry.is-wishlist .rating .n {
     font-family: var(--serif);
-    font-size: 30px;
+    font-size: 22px;
     color: var(--gold);
     font-style: italic;
     font-weight: 400;
@@ -380,9 +378,9 @@
     opacity: 0.4;
   }
   .group-divider-label {
-    padding: 14px 24px 4px;
+    padding: 10px 20px 2px;
     font-size: 9px;
-    letter-spacing: 0.4em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--gold-ink);
     font-weight: 500;
@@ -422,9 +420,9 @@
   .seg button {
     flex: 1;
     position: relative; z-index: 1;
-    padding: 10px 14px;
+    padding: 9px 12px;
     font-size: 10px;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted-fg);
     font-weight: 500;
@@ -502,22 +500,22 @@
 
   /* ---------- Empty state ---------- */
   .empty {
-    padding: 80px 32px;
+    padding: 56px 32px;
     text-align: center;
     color: var(--muted-fg);
   }
   .empty .orn {
     font-family: var(--serif);
-    font-size: 48px;
+    font-size: 38px;
     color: var(--gold);
     line-height: 1;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     font-style: italic;
   }
   .empty h2 {
     font-family: var(--serif);
     font-weight: 400;
-    font-size: 28px;
+    font-size: 23px;
     line-height: 1.2;
     margin: 0 0 10px;
     color: var(--ink);
@@ -549,9 +547,9 @@
     font-family: var(--sans);
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    padding: 16px 28px;
+    padding: 13px 22px;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
@@ -604,7 +602,7 @@
     flex: 0 0 auto;
   }
   .sheet .sheet-head {
-    padding: 20px 24px 12px;
+    padding: 14px 20px 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -613,7 +611,7 @@
   }
   .sheet .sheet-head .title {
     font-family: var(--serif);
-    font-size: 22px;
+    font-size: 19px;
     font-weight: 500;
     letter-spacing: -0.005em;
   }
@@ -631,7 +629,7 @@
     cursor: pointer;
   }
   .sheet .sheet-body {
-    padding: 20px 24px calc(40px + var(--safe-bottom));
+    padding: 16px 20px calc(32px + var(--safe-bottom));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex: 1 1 auto;
@@ -639,15 +637,15 @@
 
   /* ---------- Form ---------- */
   .field {
-    margin-bottom: 22px;
+    margin-bottom: 16px;
   }
   .field label {
     display: block;
     font-size: 9px;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted-fg);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 500;
   }
   .field input[type="text"],
@@ -655,10 +653,10 @@
   .field textarea {
     width: 100%;
     font-family: var(--serif);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 400;
     color: var(--ink);
-    padding: 6px 0 10px;
+    padding: 4px 0 8px;
     background: transparent;
     border-bottom: 1px solid var(--hairline);
     transition: border-color .3s var(--ease);
@@ -666,10 +664,10 @@
   }
   .field textarea {
     resize: none;
-    min-height: 92px;
+    min-height: 72px;
     line-height: 1.45;
     font-style: italic;
-    font-size: 17px;
+    font-size: 16px;
   }
   .field input:focus, .field textarea:focus {
     outline: none;
@@ -685,7 +683,7 @@
   .field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 22px;
+    gap: 16px;
   }
 
   /* Brand combobox */
@@ -719,17 +717,17 @@
   .form-footer {
     display: flex;
     gap: 12px;
-    margin-top: 30px;
-    padding-top: 24px;
+    margin-top: 20px;
+    padding-top: 18px;
     border-top: 1px solid var(--hairline-soft);
   }
   .btn {
     cursor: pointer;
-    padding: 16px 18px;
+    padding: 14px 16px;
     font-family: var(--sans);
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     border-radius: 999px;
     transition: transform .2s var(--ease), background .25s var(--ease), color .25s var(--ease);
@@ -834,8 +832,8 @@
   }
   .detail .hero-name {
     font-family: var(--serif);
-    font-size: clamp(32px, 8vw, 42px);
-    line-height: 1.02;
+    font-size: clamp(26px, 7vw, 34px);
+    line-height: 1.05;
     font-weight: 500;
     letter-spacing: -0.01em;
     margin: 0;
@@ -855,14 +853,14 @@
     display: flex;
     align-items: baseline;
     gap: 14px;
-    margin-top: 26px;
-    padding: 20px 0;
+    margin-top: 18px;
+    padding: 14px 0;
     border-top: 1px solid var(--hairline-soft);
     border-bottom: 1px solid var(--hairline-soft);
   }
   .detail .rating-big .n {
     font-family: var(--serif);
-    font-size: 64px;
+    font-size: 44px;
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.03em;
@@ -879,10 +877,10 @@
   .detail .notes-big {
     font-family: var(--serif);
     font-style: italic;
-    font-size: 19px;
-    line-height: 1.55;
+    font-size: 16px;
+    line-height: 1.5;
     color: var(--ink-soft);
-    margin: 28px 0 0;
+    margin: 20px 0 0;
     padding-left: 16px;
     border-left: 1px solid var(--gold);
     font-weight: 400;
@@ -891,9 +889,88 @@
   .detail-actions {
     display: flex;
     gap: 10px;
-    margin-top: 36px;
-    padding-top: 24px;
+    margin-top: 24px;
+    padding-top: 18px;
     border-top: 1px solid var(--hairline-soft);
+  }
+
+  /* ---------- Photos ---------- */
+  .photo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .photo-thumb {
+    position: relative;
+    width: 72px; height: 72px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface-muted);
+    flex: 0 0 auto;
+  }
+  .photo-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+  }
+  .photo-thumb .rm {
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(31,28,25,0.65);
+    color: #fff;
+    display: grid; place-items: center;
+    font-size: 12px; line-height: 1;
+    cursor: pointer;
+  }
+  .photo-add {
+    width: 72px; height: 72px;
+    border-radius: 8px;
+    border: 1px dashed var(--hairline);
+    display: grid; place-items: center;
+    color: var(--muted-fg);
+    font-size: 22px;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: background .25s var(--ease), color .25s var(--ease);
+  }
+  .photo-add:active { background: var(--surface-muted); color: var(--ink); }
+
+  .detail-photos {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .detail-photos img {
+    width: 96px; height: 96px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex: 0 0 auto;
+    cursor: pointer;
+    background: var(--surface-muted);
+  }
+
+  .lightbox {
+    position: fixed; inset: 0;
+    background: rgba(20,18,16,0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .lightbox.show { display: flex; }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 6px;
+    box-shadow: var(--shadow-lg);
   }
 
   /* ---------- Subtle textarea for import ---------- */
@@ -941,13 +1018,14 @@
 
   /* small screens tweaks */
   @media (max-width: 380px) {
-    .masthead { padding: 28px 18px 16px; }
-    .toolbar { padding: 14px 18px 6px; }
-    .entry { padding: 16px 18px 20px; }
-    .group-label { padding: 22px 18px 8px; }
-    .entry .hotel-name { font-size: 20px; }
-    .rating .n { font-size: 28px; }
-    .field-row { grid-template-columns: 1fr; gap: 22px; }
+    .masthead { padding: 12px 10px 8px 16px; }
+    .toolbar { padding: 8px 16px 4px; flex-wrap: wrap; }
+    .sort-toggle button { padding: 6px 8px; font-size: 9px; }
+    .entry { padding: 11px 16px 12px; }
+    .group-label { padding: 16px 16px 5px; }
+    .entry .hotel-name { font-size: 17px; }
+    .rating .n { font-size: 21px; }
+    .field-row { grid-template-columns: 1fr; gap: 16px; }
   }
 </style>
 </head>
@@ -955,15 +1033,13 @@
 
 <div class="app">
   <header class="masthead">
-    <div class="sync-badge" id="syncBadge"><span class="dot"></span><span id="syncLabel">Local</span></div>
-    <button class="settings-btn" id="openSettings" aria-label="Settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
-
-    <div class="eyebrow">Volume <span id="issueVol">I</span> &middot; Private Collection</div>
     <h1>Hotel <em>Journal</em></h1>
-    <div class="rule"></div>
-    <div class="issue">A personal register of stays</div>
+    <div class="mast-right">
+      <div class="sync-badge" id="syncBadge"><span class="dot"></span><span id="syncLabel">Local</span></div>
+      <button class="settings-btn" id="openSettings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
   </header>
 
   <div class="toolbar">
@@ -993,6 +1069,9 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Photo lightbox -->
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt="" /></div>
 
 <!-- Scrim -->
 <div class="scrim" id="scrim"></div>
@@ -1056,6 +1135,14 @@
       <div class="field">
         <label for="f-notes">Notes</label>
         <textarea id="f-notes" placeholder="Moss gardens at dawn. Soaking tub overlooking the cedars."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Photos <span style="text-transform:none;letter-spacing:0;">(stored on this device only)</span></label>
+        <div class="photo-grid" id="photoGrid">
+          <button type="button" class="photo-add" id="photoAddBtn" aria-label="Add photo">+</button>
+        </div>
+        <input type="file" id="photoFile" accept="image/*" multiple style="display:none;" />
       </div>
 
       <div class="form-footer">
@@ -1128,7 +1215,7 @@
 
     <div class="settings-section">
       <h3>Import &amp; <em>export</em></h3>
-      <p>JSON is for moving everything between phones. XLSX is for spreadsheet review.</p>
+      <p>JSON is for moving everything between phones. XLSX is for spreadsheet review. Photos stay on this device &mdash; they are not included in exports or cloud sync, which keeps both fast.</p>
       <div class="row">
         <button class="btn outline" id="exportJsonBtn">Export JSON</button>
         <button class="btn outline" id="importJsonBtn">Import JSON</button>
@@ -1202,7 +1289,7 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.2.2";
+const VERSION = "1.3.0";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1226,12 +1313,76 @@ let state = {
   editingId: null,
 };
 
-/* ---------- Migration: ensure each hotel has country and status fields ---------- */
+/* ---------- Migration: ensure each hotel has country, status and photos fields ---------- */
 state.hotels = state.hotels.map(h => ({
   country: '',
   status: 'stayed', // 'stayed' | 'wishlist'
+  photos: [],       // ids of photos stored locally in IndexedDB
   ...h,
 }));
+
+/* ============================================================
+ * Local photo store (IndexedDB)
+ * Photos never enter localStorage or the sync payload, so the
+ * app and cloud sync stay fast. Each record: {id, full, thumb}.
+ * ============================================================ */
+let _photoDb = null;
+function photoDB() {
+  return new Promise((resolve, reject) => {
+    if (_photoDb) return resolve(_photoDb);
+    if (!('indexedDB' in window)) return reject(new Error('No IndexedDB'));
+    const req = indexedDB.open('hj-photos', 1);
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore('photos', { keyPath: 'id' });
+    };
+    req.onsuccess = () => { _photoDb = req.result; resolve(_photoDb); };
+    req.onerror = () => reject(req.error);
+  });
+}
+function photoTx(mode, fn) {
+  return photoDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction('photos', mode);
+    const out = fn(tx.objectStore('photos'));
+    tx.oncomplete = () => resolve(out && out.result !== undefined ? out.result : undefined);
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+function photoPut(rec)  { return photoTx('readwrite', s => s.put(rec)); }
+function photoGet(id) {
+  return photoDB().then(db => new Promise((resolve, reject) => {
+    const req = db.transaction('photos').objectStore('photos').get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  }));
+}
+function photoDeleteMany(ids) {
+  if (!ids || !ids.length) return Promise.resolve();
+  return photoTx('readwrite', s => { ids.forEach(id => s.delete(id)); }).catch(()=>{});
+}
+function photoClearAll() {
+  return photoTx('readwrite', s => s.clear()).catch(()=>{});
+}
+
+/* Downscale + JPEG-compress an image file; returns {full, thumb} blobs. */
+async function compressPhoto(file) {
+  const bitmap = await createImageBitmap(file);
+  const toBlob = (source, maxDim, quality) => {
+    const scale = Math.min(1, maxDim / Math.max(source.width, source.height));
+    const w = Math.max(1, Math.round(source.width * scale));
+    const h = Math.max(1, Math.round(source.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(source, 0, 0, w, h);
+    return new Promise((resolve, reject) =>
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('Encode failed')), 'image/jpeg', quality));
+  };
+  const [full, thumb] = await Promise.all([
+    toBlob(bitmap, 1600, 0.8),
+    toBlob(bitmap, 360, 0.7),
+  ]);
+  bitmap.close && bitmap.close();
+  return { full, thumb };
+}
 
 function load(key, fallback) {
   try {
@@ -1268,6 +1419,7 @@ function openSheet(sheet) {
   document.body.style.overflow = 'hidden';
 }
 function closeAllSheets() {
+  discardPendingPhotos();
   scrim.classList.remove('show');
   [editSheet, detailSheet, settingsSheet, importSheet].forEach(s => {
     s.classList.remove('show');
@@ -1426,6 +1578,7 @@ function entryHTML(h, keyShown) {
   if (keyShown !== 'city'    && h.city)    metaParts.push(`<span>${escapeHtml(h.city)}</span>`);
   if (keyShown !== 'country' && h.country) metaParts.push(`<span>${escapeHtml(h.country)}</span>`);
   if (keyShown !== 'brand'   && h.brand)   metaParts.push(`<span class="hotel-brand">${escapeHtml(h.brand)}</span>`);
+  if (h.photos?.length) metaParts.push(`<span class="photo-flag">&#9635; ${h.photos.length}</span>`);
   const metaHtml = metaParts.length
     ? metaParts.join('<span class="sep"></span>')
     : `<span>&nbsp;</span>`;
@@ -1477,16 +1630,34 @@ function openDetail(id) {
         <div class="label">${isWish ? 'On the list to try' : 'Out of 5.00'}</div>
       </div>
       ${h.notes ? `<blockquote class="notes-big">${escapeHtml(h.notes)}</blockquote>` : ''}
+      ${h.photos?.length ? `<div class="detail-photos" id="detailPhotos"></div>` : ''}
       <div class="detail-actions">
         <button class="btn outline" id="editFromDetail">Edit</button>
         <button class="btn danger" id="delFromDetail">Delete</button>
       </div>
     </div>`;
   openSheet(detailSheet);
+  if (h.photos?.length) renderDetailPhotos(h.photos);
   $('#editFromDetail').onclick = () => { closeAllSheets(); setTimeout(() => openEdit(id), 300); };
   $('#delFromDetail').onclick  = () => {
     if (confirm('Delete this entry?')) { deleteHotel(id); closeAllSheets(); }
   };
+}
+
+let _detailUrls = [];
+async function renderDetailPhotos(ids) {
+  const strip = $('#detailPhotos');
+  if (!strip) return;
+  _detailUrls.splice(0).forEach(u => URL.revokeObjectURL(u));
+  const recs = await Promise.all(ids.map(id => photoGet(id).catch(() => null)));
+  strip.innerHTML = recs.filter(Boolean).map(rec => {
+    const u = URL.createObjectURL(rec.thumb || rec.full);
+    _detailUrls.push(u);
+    return `<img src="${u}" data-pid="${rec.id}" alt="Photo" loading="lazy" />`;
+  }).join('');
+  strip.querySelectorAll('img').forEach(img => {
+    img.onclick = () => openLightbox(img.dataset.pid);
+  });
 }
 
 function emphasizeFirstWord(s) {
@@ -1496,6 +1667,100 @@ function emphasizeFirstWord(s) {
 }
 
 /* ---------- Edit ---------- */
+
+/* Photo state for the open edit sheet */
+let editPhotos = [];       // photo ids attached to the entry being edited
+let newPhotoIds = [];      // added during this edit; deleted from IDB if the sheet is cancelled
+let removedPhotoIds = [];  // pre-existing ids removed during this edit; deleted from IDB on save
+const _photoUrls = [];     // object URLs to revoke on re-render
+
+function revokePhotoUrls() {
+  _photoUrls.splice(0).forEach(u => URL.revokeObjectURL(u));
+}
+function trackUrl(blob) {
+  const u = URL.createObjectURL(blob);
+  _photoUrls.push(u);
+  return u;
+}
+function discardPendingPhotos() {
+  if (newPhotoIds.length) photoDeleteMany(newPhotoIds.splice(0));
+  removedPhotoIds = [];
+  revokePhotoUrls();
+}
+
+async function renderPhotoGrid() {
+  const grid = $('#photoGrid');
+  revokePhotoUrls();
+  let html = '';
+  const thumbs = await Promise.all(editPhotos.map(id => photoGet(id).catch(() => null)));
+  thumbs.forEach((rec, i) => {
+    if (!rec) return;
+    html += `
+      <div class="photo-thumb" data-pid="${rec.id}">
+        <img src="${trackUrl(rec.thumb || rec.full)}" alt="Photo ${i+1}" />
+        <button type="button" class="rm" aria-label="Remove photo">&times;</button>
+      </div>`;
+  });
+  html += `<button type="button" class="photo-add" id="photoAddBtn" aria-label="Add photo">+</button>`;
+  grid.innerHTML = html;
+  $('#photoAddBtn').onclick = () => $('#photoFile').click();
+  $$('#photoGrid .photo-thumb').forEach(el => {
+    const pid = el.dataset.pid;
+    el.querySelector('.rm').onclick = (e) => {
+      e.stopPropagation();
+      editPhotos = editPhotos.filter(x => x !== pid);
+      if (newPhotoIds.includes(pid)) {
+        newPhotoIds = newPhotoIds.filter(x => x !== pid);
+        photoDeleteMany([pid]);
+      } else {
+        removedPhotoIds.push(pid);
+      }
+      renderPhotoGrid();
+    };
+    el.querySelector('img').onclick = (e) => {
+      e.stopPropagation();
+      openLightbox(pid);
+    };
+  });
+}
+
+$('#photoFile').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if (!files.length) return;
+  showToast('Adding photo' + (files.length > 1 ? 's' : '') + '…');
+  for (const f of files) {
+    try {
+      const { full, thumb } = await compressPhoto(f);
+      const id = 'p_' + uid();
+      await photoPut({ id, full, thumb, created: Date.now() });
+      editPhotos.push(id);
+      newPhotoIds.push(id);
+    } catch (err) {
+      console.error(err);
+      showToast('Could not add a photo', 'err');
+    }
+  }
+  renderPhotoGrid();
+});
+
+async function openLightbox(pid) {
+  const rec = await photoGet(pid).catch(() => null);
+  if (!rec) return;
+  const img = $('#lightboxImg');
+  if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
+  const url = URL.createObjectURL(rec.full);
+  img.dataset.url = url;
+  img.src = url;
+  $('#lightbox').classList.add('show');
+}
+$('#lightbox').addEventListener('click', () => {
+  const img = $('#lightboxImg');
+  $('#lightbox').classList.remove('show');
+  if (img.dataset.url) { URL.revokeObjectURL(img.dataset.url); delete img.dataset.url; }
+  img.removeAttribute('src');
+});
+
 function openEdit(id=null) {
   state.editingId = id;
   const h = id ? state.hotels.find(x => x.id === id) : null;
@@ -1510,6 +1775,10 @@ function openEdit(id=null) {
   $('#deleteBtn').style.display = h ? 'inline-flex' : 'none';
   renderStars(h?.rating);
   renderDatalists();
+  editPhotos = (h?.photos || []).slice();
+  newPhotoIds = [];
+  removedPhotoIds = [];
+  renderPhotoGrid();
   openSheet(editSheet);
   setTimeout(() => $('#f-city').focus(), 300);
 }
@@ -1567,6 +1836,7 @@ $('#editForm').addEventListener('submit', e => {
     brand:   normalizeBrand($('#f-brand').value),
     rating,                           // null for wishlist (no visit yet)
     notes:   $('#f-notes').value.trim(),
+    photos:  editPhotos.slice(),
     updated: Date.now(),
   };
   if (!entry.city || !entry.name) {
@@ -1580,6 +1850,10 @@ $('#editForm').addEventListener('submit', e => {
   }
   save(LS.HOTELS, state.hotels);
   updateBrands();
+  // Commit photo changes: keep new ones, purge the ones removed in this edit
+  photoDeleteMany(removedPhotoIds);
+  newPhotoIds = [];
+  removedPhotoIds = [];
   closeAllSheets();
   render();
   showToast(state.editingId ? 'Updated' : 'Added');
@@ -1594,6 +1868,8 @@ $('#deleteBtn').addEventListener('click', () => {
 });
 
 function deleteHotel(id) {
+  const h = state.hotels.find(x => x.id === id);
+  if (h?.photos?.length) photoDeleteMany(h.photos);
   state.hotels = state.hotels.filter(x => x.id !== id);
   save(LS.HOTELS, state.hotels);
   updateBrands();
@@ -1885,6 +2161,7 @@ function applyImported(payload) {
     brand:   String(h.brand   || '').trim(),
     rating:  h.rating == null || h.rating === '' ? null : Math.round(Number(h.rating)*100)/100,
     notes:   String(h.notes   || ''),
+    photos:  Array.isArray(h.photos) ? h.photos.filter(p => typeof p === 'string') : [],
     updated: Number(h.updated || Date.now()),
   }));
   state.hotels = hotels;
@@ -1967,6 +2244,7 @@ $('#wipeBtn').addEventListener('click', () => {
   save(LS.BRANDS,    state.brands);
   save(LS.CITIES,    state.cities);
   save(LS.COUNTRIES, state.countries);
+  photoClearAll();
   renderDatalists();
   render();
   showToast('Local data erased');
