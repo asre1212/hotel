@@ -376,8 +376,8 @@
 
   .entry-contact { grid-column: 1 / -1; border-top: 1px solid var(--hairline-soft); padding-top: 8px; font-size: 11px; line-height: 1.5; color: var(--muted-fg); overflow-wrap: anywhere; }
   .entry-contact .contact-label { color: var(--gold-ink); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-right: 8px; }
-  .entry-contact span + span::before { content: " · "; color: var(--gold-ink); padding: 0 3px; }
-  .entry-contact .contact-label + span::before { content: none; padding: 0; }
+  .entry-contact .contact-person { margin-top: 3px; }
+  .entry-contact .contact-person span + span::before { content: " · "; color: var(--gold-ink); padding: 0 3px; }
   .rating {
     display: flex;
     flex-direction: column;
@@ -756,6 +756,11 @@
   .contact-form-section { margin: 22px 0 18px; padding: 18px 16px 2px; border: 1px solid var(--hairline-soft); border-radius: 12px; background: var(--surface-muted); }
   .contact-form-section h3 { font-family: var(--serif); font-size: 20px; font-weight: 500; margin: 0 0 16px; }
   .contact-form-section input { min-width: 0; }
+  .contact-form-section .contact-form-item + .contact-form-item { border-top: 1px solid var(--hairline); padding-top: 16px; }
+  .contact-form-section .contact-form-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .contact-form-section .contact-form-head strong { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-fg); }
+  .contact-form-section .remove-contact { color: var(--danger); font-size: 11px; cursor: pointer; padding: 4px; }
+  .contact-form-section .add-contact { margin: 0 0 16px; cursor: pointer; color: var(--gold-ink); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
   /* Brand combobox */
   .brand-wrap { position: relative; }
   .brand-wrap::after {
@@ -975,6 +980,7 @@
   .detail-contact h3 { font-family: var(--serif); font-size: 20px; font-weight: 500; margin: 0 0 10px; }
   .detail-contact p { margin: 6px 0; font-size: 13px; color: var(--ink-soft); }
   .detail-contact a { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .detail-contact .contact-person + .contact-person { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hairline-soft); }
   .detail-actions {
     display: flex;
     gap: 10px;
@@ -1250,10 +1256,9 @@
       </div>
 
       <section class="contact-form-section" aria-labelledby="contactFormTitle">
-        <h3 id="contactFormTitle">Contact</h3>
-        <div class="field"><label for="f-contact-name">Contact name</label><input type="text" id="f-contact-name" placeholder="Name or concierge team" autocomplete="name" /></div>
-        <div class="field"><label for="f-contact-email">Email</label><input type="email" id="f-contact-email" placeholder="name@hotel.com" autocomplete="email" autocapitalize="off" /></div>
-        <div class="field"><label for="f-contact-phone">Telephone</label><input type="tel" id="f-contact-phone" placeholder="+1 555 123 4567" autocomplete="tel" /></div>
+        <h3 id="contactFormTitle">Contacts</h3>
+        <div id="contactFields"></div>
+        <button type="button" class="add-contact" id="addContactBtn">+ Add contact</button>
       </section>
       <div class="form-footer">
         <button type="button" class="btn ghost" id="deleteBtn" style="display:none;">Delete</button>
@@ -1396,7 +1401,7 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.5.0";
+const VERSION = "1.6.0";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1421,15 +1426,28 @@ let state = {
   editingId: null,
 };
 
-/* ---------- Migration: ensure each hotel has country, status and photos fields ---------- */
+/* ---------- Migration: preserve existing single contacts as the first contact ---------- */
+function contactsForHotel(h) {
+  if (Array.isArray(h.contacts)) {
+    return h.contacts.filter(c => c && typeof c === 'object').map(c => ({
+      name: String(c.name || '').trim(),
+      email: String(c.email || '').trim(),
+      phone: String(c.phone || '').trim(),
+    })).filter(c => c.name || c.email || c.phone);
+  }
+  const legacy = {
+    name: String(h.contactName || '').trim(),
+    email: String(h.contactEmail || '').trim(),
+    phone: String(h.contactPhone || '').trim(),
+  };
+  return legacy.name || legacy.email || legacy.phone ? [legacy] : [];
+}
 state.hotels = state.hotels.map(h => ({
   country: '',
   status: 'stayed', // 'stayed' | 'wishlist'
   photos: [],       // ids of photos stored locally in IndexedDB
-  contactName: '',
-  contactEmail: '',
-  contactPhone: '',
   ...h,
+  contacts: contactsForHotel(h),
 }));
 
 /* ============================================================
@@ -1616,7 +1634,7 @@ function render() {
   const q = (state.query || '').trim().toLowerCase();
   const shown = q
     ? state.hotels.filter(h =>
-        [h.name, h.city, h.country, h.brand, h.notes, h.contactName, h.contactEmail, h.contactPhone]
+        [h.name, h.city, h.country, h.brand, h.notes, ...contactsForHotel(h).flatMap(c => [c.name, c.email, c.phone])]
           .some(v => (v || '').toLowerCase().includes(q)))
     : state.hotels;
 
@@ -1750,8 +1768,10 @@ function entryHTML(h, keyShown, rank=null) {
     ? words.slice(0, MAX_WORDS).join(' ') + '…'      // …
     : fullNote;
   const notes = previewNote ? `<div class="notes">&ldquo;${escapeHtml(previewNote)}&rdquo;</div>` : '';
-  const contactParts = [h.contactName, h.contactEmail, h.contactPhone].filter(Boolean).map(v => `<span>${escapeHtml(v)}</span>`);
-  const contact = contactParts.length ? `<div class="entry-contact"><span class="contact-label">Contact</span>${contactParts.join('')}</div>` : '';
+  const contacts = contactsForHotel(h);
+  const contact = contacts.length ? `<div class="entry-contact"><span class="contact-label">Contacts</span>
+    ${contacts.map(c => `<div class="contact-person">${[c.name, c.email, c.phone].filter(Boolean).map(v => `<span>${escapeHtml(v)}</span>`).join('')}</div>`).join('')}
+  </div>` : '';
 
   const rightSide = isWish
     ? `<div class="rating"><div class="n">&#9826;</div><div class="of">To&nbsp;try</div></div>`
@@ -1824,15 +1844,18 @@ async function renderDetailPhotos(ids) {
 }
 
 function contactDetailHTML(h) {
-  if (![h.contactName, h.contactEmail, h.contactPhone].some(Boolean)) return '';
-  const email = String(h.contactEmail || '').trim();
-  const phone = String(h.contactPhone || '').trim();
-  const phoneHref = phone.replace(/[^+0-9]/g, '');
-  return `<section class="detail-contact" aria-label="Contact">
-    <h3>Contact</h3>
-    ${h.contactName ? `<p>${escapeHtml(h.contactName)}</p>` : ''}
-    ${email ? `<p><a href="mailto:${encodeURIComponent(email)}">${escapeHtml(email)}</a></p>` : ''}
-    ${phone ? `<p>${phoneHref ? `<a href="tel:${escapeAttr(phoneHref)}">${escapeHtml(phone)}</a>` : escapeHtml(phone)}</p>` : ''}
+  const contacts = contactsForHotel(h);
+  if (!contacts.length) return '';
+  return `<section class="detail-contact" aria-label="Contacts">
+    <h3>Contacts</h3>
+    ${contacts.map(c => {
+      const phoneHref = c.phone.replace(/[^+0-9]/g, '');
+      return `<div class="contact-person">
+        ${c.name ? `<p>${escapeHtml(c.name)}</p>` : ''}
+        ${c.email ? `<p><a href="mailto:${encodeURIComponent(c.email)}">${escapeHtml(c.email)}</a></p>` : ''}
+        ${c.phone ? `<p>${phoneHref ? `<a href="tel:${escapeAttr(phoneHref)}">${escapeHtml(c.phone)}</a>` : escapeHtml(c.phone)}</p>` : ''}
+      </div>`;
+    }).join('')}
   </section>`;
 }
 function emphasizeFirstWord(s) {
@@ -1936,6 +1959,37 @@ $('#lightbox').addEventListener('click', () => {
   img.removeAttribute('src');
 });
 
+function readContactFields() {
+  return $('#contactFields .contact-form-item').map(row => ({
+    name: row.querySelector('[data-contact-name]').value.trim(),
+    email: row.querySelector('[data-contact-email]').value.trim(),
+    phone: row.querySelector('[data-contact-phone]').value.trim(),
+  }));
+}
+function renderContactFields(contacts=[]) {
+  const entries = contacts.length ? contacts : [{name:'', email:'', phone:''}];
+  $('#contactFields').innerHTML = entries.map((c, i) => `
+    <div class="contact-form-item">
+      <div class="contact-form-head"><strong>Contact ${i + 1}</strong><button type="button" class="remove-contact" data-remove-contact="${i}" aria-label="Remove contact ${i + 1}">Remove</button></div>
+      <div class="field"><label for="f-contact-name-${i}">Contact name</label><input type="text" id="f-contact-name-${i}" data-contact-name value="${escapeAttr(c.name || '')}" placeholder="Name or concierge team" /></div>
+      <div class="field"><label for="f-contact-email-${i}">Email</label><input type="email" id="f-contact-email-${i}" data-contact-email value="${escapeAttr(c.email || '')}" placeholder="name@hotel.com" autocapitalize="off" /></div>
+      <div class="field"><label for="f-contact-phone-${i}">Telephone</label><input type="tel" id="f-contact-phone-${i}" data-contact-phone value="${escapeAttr(c.phone || '')}" placeholder="+1 555 123 4567" /></div>
+    </div>`).join('');
+}
+$('#addContactBtn').addEventListener('click', () => {
+  const contacts = readContactFields();
+  contacts.push({name:'', email:'', phone:''});
+  renderContactFields(contacts);
+  $('#contactFields .contact-form-item:last-child [data-contact-name]').focus();
+});
+$('#contactFields').addEventListener('click', e => {
+  const btn = e.target.closest('[data-remove-contact]');
+  if (!btn) return;
+  const contacts = readContactFields();
+  contacts.splice(Number(btn.dataset.removeContact), 1);
+  renderContactFields(contacts);
+});
+
 function openEdit(id=null) {
   state.editingId = id;
   const h = id ? state.hotels.find(x => x.id === id) : null;
@@ -1946,9 +2000,7 @@ function openEdit(id=null) {
   $('#f-brand').value   = h?.brand   || '';
   $('#f-rating').value  = h?.rating != null ? h.rating : '';
   $('#f-notes').value   = h?.notes   || '';
-  $('#f-contact-name').value  = h?.contactName  || '';
-  $('#f-contact-email').value = h?.contactEmail || '';
-  $('#f-contact-phone').value = h?.contactPhone || '';
+  renderContactFields(h ? contactsForHotel(h) : []);
   setStatus(h?.status === 'wishlist' ? 'wishlist' : 'stayed');
   $('#deleteBtn').style.display = h ? 'inline-flex' : 'none';
   renderStars(h?.rating);
@@ -2014,9 +2066,7 @@ $('#editForm').addEventListener('submit', e => {
     brand:   normalizeBrand($('#f-brand').value),
     rating,                           // null for wishlist (no visit yet)
     notes:   $('#f-notes').value.trim(),
-    contactName:  $('#f-contact-name').value.trim(),
-    contactEmail: $('#f-contact-email').value.trim(),
-    contactPhone: $('#f-contact-phone').value.trim(),
+    contacts: readContactFields().filter(c => c.name || c.email || c.phone),
     photos:  editPhotos.slice(),
     updated: Date.now(),
   };
@@ -2406,9 +2456,7 @@ function applyImported(payload) {
     brand:   String(h.brand   || '').trim(),
     rating:  h.rating == null || h.rating === '' ? null : Math.round(Number(h.rating)*100)/100,
     notes:   String(h.notes   || ''),
-    contactName:  String(h.contactName  || '').trim(),
-    contactEmail: String(h.contactEmail || '').trim(),
-    contactPhone: String(h.contactPhone || '').trim(),
+    contacts: contactsForHotel(h),
     photos:  Array.isArray(h.photos) ? h.photos.filter(p => typeof p === 'string') : [],
     updated: Number(h.updated || Date.now()),
   }));
@@ -2489,9 +2537,9 @@ $('#exportXlsxBtn').addEventListener('click', async () => {
       Brand:         h.brand   || '',
       'Rating (/5)': h.rating == null ? '' : Number(h.rating),
       Notes:         h.notes   || '',
-      'Contact Name':  h.contactName  || '',
-      'Contact Email': h.contactEmail || '',
-      'Contact Phone': h.contactPhone || '',
+      'Contact Name':  contactsForHotel(h).map(c => c.name).join('\n'),
+      'Contact Email': contactsForHotel(h).map(c => c.email).join('\n'),
+      'Contact Phone': contactsForHotel(h).map(c => c.phone).join('\n'),
       'Last Updated': h.updated ? new Date(h.updated).toISOString().slice(0,19).replace('T',' ') : '',
     }));
   const headers = ['Status','Country','City','Hotel Name','Brand','Rating (/5)','Notes','Contact Name','Contact Email','Contact Phone','Last Updated'];
