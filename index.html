@@ -374,6 +374,10 @@
     overflow-wrap: break-word;
   }
 
+  .entry-contact { grid-column: 1 / -1; border-top: 1px solid var(--hairline-soft); padding-top: 8px; font-size: 11px; line-height: 1.5; color: var(--muted-fg); overflow-wrap: anywhere; }
+  .entry-contact .contact-label { color: var(--gold-ink); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-right: 8px; }
+  .entry-contact span + span::before { content: " · "; color: var(--gold-ink); padding: 0 3px; }
+  .entry-contact .contact-label + span::before { content: none; padding: 0; }
   .rating {
     display: flex;
     flex-direction: column;
@@ -711,6 +715,8 @@
   }
   .field input[type="text"],
   .field input[type="number"],
+  .field input[type="email"],
+  .field input[type="tel"],
   .field textarea {
     width: 100%;
     font-family: var(--serif);
@@ -747,6 +753,9 @@
     gap: 16px;
   }
 
+  .contact-form-section { margin: 22px 0 18px; padding: 18px 16px 2px; border: 1px solid var(--hairline-soft); border-radius: 12px; background: var(--surface-muted); }
+  .contact-form-section h3 { font-family: var(--serif); font-size: 20px; font-weight: 500; margin: 0 0 16px; }
+  .contact-form-section input { min-width: 0; }
   /* Brand combobox */
   .brand-wrap { position: relative; }
   .brand-wrap::after {
@@ -962,6 +971,10 @@
     font-weight: 400;
   }
 
+  .detail-contact { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--hairline-soft); overflow-wrap: anywhere; }
+  .detail-contact h3 { font-family: var(--serif); font-size: 20px; font-weight: 500; margin: 0 0 10px; }
+  .detail-contact p { margin: 6px 0; font-size: 13px; color: var(--ink-soft); }
+  .detail-contact a { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 3px; }
   .detail-actions {
     display: flex;
     gap: 10px;
@@ -1236,6 +1249,12 @@
         <input type="file" id="photoFile" accept="image/*" multiple style="display:none;" />
       </div>
 
+      <section class="contact-form-section" aria-labelledby="contactFormTitle">
+        <h3 id="contactFormTitle">Contact</h3>
+        <div class="field"><label for="f-contact-name">Contact name</label><input type="text" id="f-contact-name" placeholder="Name or concierge team" autocomplete="name" /></div>
+        <div class="field"><label for="f-contact-email">Email</label><input type="email" id="f-contact-email" placeholder="name@hotel.com" autocomplete="email" autocapitalize="off" /></div>
+        <div class="field"><label for="f-contact-phone">Telephone</label><input type="tel" id="f-contact-phone" placeholder="+1 555 123 4567" autocomplete="tel" /></div>
+      </section>
       <div class="form-footer">
         <button type="button" class="btn ghost" id="deleteBtn" style="display:none;">Delete</button>
         <button type="submit" class="btn primary" id="saveBtn">Save entry</button>
@@ -1377,7 +1396,7 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.4.0";
+const VERSION = "1.5.0";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1407,6 +1426,9 @@ state.hotels = state.hotels.map(h => ({
   country: '',
   status: 'stayed', // 'stayed' | 'wishlist'
   photos: [],       // ids of photos stored locally in IndexedDB
+  contactName: '',
+  contactEmail: '',
+  contactPhone: '',
   ...h,
 }));
 
@@ -1594,7 +1616,7 @@ function render() {
   const q = (state.query || '').trim().toLowerCase();
   const shown = q
     ? state.hotels.filter(h =>
-        [h.name, h.city, h.country, h.brand, h.notes]
+        [h.name, h.city, h.country, h.brand, h.notes, h.contactName, h.contactEmail, h.contactPhone]
           .some(v => (v || '').toLowerCase().includes(q)))
     : state.hotels;
 
@@ -1728,6 +1750,8 @@ function entryHTML(h, keyShown, rank=null) {
     ? words.slice(0, MAX_WORDS).join(' ') + '…'      // …
     : fullNote;
   const notes = previewNote ? `<div class="notes">&ldquo;${escapeHtml(previewNote)}&rdquo;</div>` : '';
+  const contactParts = [h.contactName, h.contactEmail, h.contactPhone].filter(Boolean).map(v => `<span>${escapeHtml(v)}</span>`);
+  const contact = contactParts.length ? `<div class="entry-contact"><span class="contact-label">Contact</span>${contactParts.join('')}</div>` : '';
 
   const rightSide = isWish
     ? `<div class="rating"><div class="n">&#9826;</div><div class="of">To&nbsp;try</div></div>`
@@ -1741,6 +1765,7 @@ function entryHTML(h, keyShown, rank=null) {
         ${notes}
       </div>
       ${rightSide}
+      ${contact}
     </article>`;
 }
 
@@ -1768,6 +1793,7 @@ function openDetail(id) {
       </div>
       ${h.notes ? `<blockquote class="notes-big">${escapeHtml(h.notes)}</blockquote>` : ''}
       ${h.photos?.length ? `<div class="detail-photos" id="detailPhotos"></div>` : ''}
+      ${contactDetailHTML(h)}
       <div class="detail-actions">
         <button class="btn outline" id="editFromDetail">Edit</button>
         <button class="btn danger" id="delFromDetail">Delete</button>
@@ -1797,6 +1823,18 @@ async function renderDetailPhotos(ids) {
   });
 }
 
+function contactDetailHTML(h) {
+  if (![h.contactName, h.contactEmail, h.contactPhone].some(Boolean)) return '';
+  const email = String(h.contactEmail || '').trim();
+  const phone = String(h.contactPhone || '').trim();
+  const phoneHref = phone.replace(/[^+0-9]/g, '');
+  return `<section class="detail-contact" aria-label="Contact">
+    <h3>Contact</h3>
+    ${h.contactName ? `<p>${escapeHtml(h.contactName)}</p>` : ''}
+    ${email ? `<p><a href="mailto:${encodeURIComponent(email)}">${escapeHtml(email)}</a></p>` : ''}
+    ${phone ? `<p>${phoneHref ? `<a href="tel:${escapeAttr(phoneHref)}">${escapeHtml(phone)}</a>` : escapeHtml(phone)}</p>` : ''}
+  </section>`;
+}
 function emphasizeFirstWord(s) {
   const parts = s.split(/\s+/);
   if (parts.length === 1) return `<em>${escapeHtml(s)}</em>`;
@@ -1908,6 +1946,9 @@ function openEdit(id=null) {
   $('#f-brand').value   = h?.brand   || '';
   $('#f-rating').value  = h?.rating != null ? h.rating : '';
   $('#f-notes').value   = h?.notes   || '';
+  $('#f-contact-name').value  = h?.contactName  || '';
+  $('#f-contact-email').value = h?.contactEmail || '';
+  $('#f-contact-phone').value = h?.contactPhone || '';
   setStatus(h?.status === 'wishlist' ? 'wishlist' : 'stayed');
   $('#deleteBtn').style.display = h ? 'inline-flex' : 'none';
   renderStars(h?.rating);
@@ -1973,6 +2014,9 @@ $('#editForm').addEventListener('submit', e => {
     brand:   normalizeBrand($('#f-brand').value),
     rating,                           // null for wishlist (no visit yet)
     notes:   $('#f-notes').value.trim(),
+    contactName:  $('#f-contact-name').value.trim(),
+    contactEmail: $('#f-contact-email').value.trim(),
+    contactPhone: $('#f-contact-phone').value.trim(),
     photos:  editPhotos.slice(),
     updated: Date.now(),
   };
@@ -2362,6 +2406,9 @@ function applyImported(payload) {
     brand:   String(h.brand   || '').trim(),
     rating:  h.rating == null || h.rating === '' ? null : Math.round(Number(h.rating)*100)/100,
     notes:   String(h.notes   || ''),
+    contactName:  String(h.contactName  || '').trim(),
+    contactEmail: String(h.contactEmail || '').trim(),
+    contactPhone: String(h.contactPhone || '').trim(),
     photos:  Array.isArray(h.photos) ? h.photos.filter(p => typeof p === 'string') : [],
     updated: Number(h.updated || Date.now()),
   }));
@@ -2442,12 +2489,15 @@ $('#exportXlsxBtn').addEventListener('click', async () => {
       Brand:         h.brand   || '',
       'Rating (/5)': h.rating == null ? '' : Number(h.rating),
       Notes:         h.notes   || '',
+      'Contact Name':  h.contactName  || '',
+      'Contact Email': h.contactEmail || '',
+      'Contact Phone': h.contactPhone || '',
       'Last Updated': h.updated ? new Date(h.updated).toISOString().slice(0,19).replace('T',' ') : '',
     }));
-  const headers = ['Status','Country','City','Hotel Name','Brand','Rating (/5)','Notes','Last Updated'];
+  const headers = ['Status','Country','City','Hotel Name','Brand','Rating (/5)','Notes','Contact Name','Contact Email','Contact Phone','Last Updated'];
   const ws = XLSX.utils.json_to_sheet(rows, {header: headers});
   ws['!cols'] = [
-    {wch:10},{wch:18},{wch:22},{wch:32},{wch:22},{wch:12},{wch:52},{wch:20}
+    {wch:10},{wch:18},{wch:22},{wch:32},{wch:22},{wch:12},{wch:52},{wch:24},{wch:32},{wch:22},{wch:20}
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Hotels');
