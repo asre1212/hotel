@@ -374,10 +374,6 @@
     overflow-wrap: break-word;
   }
 
-  .entry-contact { grid-column: 1 / -1; border-top: 1px solid var(--hairline-soft); padding-top: 8px; font-size: 11px; line-height: 1.5; color: var(--muted-fg); overflow-wrap: anywhere; }
-  .entry-contact .contact-label { color: var(--gold-ink); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-right: 8px; }
-  .entry-contact .contact-person { margin-top: 3px; }
-  .entry-contact .contact-person span + span::before { content: " · "; color: var(--gold-ink); padding: 0 3px; }
   .rating {
     display: flex;
     flex-direction: column;
@@ -1401,7 +1397,7 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.6.0";
+const VERSION = "1.6.1";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1768,11 +1764,6 @@ function entryHTML(h, keyShown, rank=null) {
     ? words.slice(0, MAX_WORDS).join(' ') + '…'      // …
     : fullNote;
   const notes = previewNote ? `<div class="notes">&ldquo;${escapeHtml(previewNote)}&rdquo;</div>` : '';
-  const contacts = contactsForHotel(h);
-  const contact = contacts.length ? `<div class="entry-contact"><span class="contact-label">Contacts</span>
-    ${contacts.map(c => `<div class="contact-person">${[c.name, c.email, c.phone].filter(Boolean).map(v => `<span>${escapeHtml(v)}</span>`).join('')}</div>`).join('')}
-  </div>` : '';
-
   const rightSide = isWish
     ? `<div class="rating"><div class="n">&#9826;</div><div class="of">To&nbsp;try</div></div>`
     : `<div class="rating"><div class="n">${formatRating(h.rating)}</div><div class="of">/ 5</div></div>`;
@@ -1785,7 +1776,6 @@ function entryHTML(h, keyShown, rank=null) {
         ${notes}
       </div>
       ${rightSide}
-      ${contact}
     </article>`;
 }
 
