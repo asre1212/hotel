@@ -1397,7 +1397,7 @@
  * Single-file iPhone web app, Luxury/Editorial.
  * ============================================================ */
 
-const VERSION = "1.6.1";
+const VERSION = "1.6.2";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1950,7 +1950,7 @@ $('#lightbox').addEventListener('click', () => {
 });
 
 function readContactFields() {
-  return $('#contactFields .contact-form-item').map(row => ({
+  return $$('#contactFields .contact-form-item').map(row => ({
     name: row.querySelector('[data-contact-name]').value.trim(),
     email: row.querySelector('[data-contact-email]').value.trim(),
     phone: row.querySelector('[data-contact-phone]').value.trim(),
