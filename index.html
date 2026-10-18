@@ -697,6 +697,22 @@
   }
 
   /* ---------- Form ---------- */
+  .entry-head-actions { display:flex; align-items:center; gap:4px; }
+  .voice-mic { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:1px solid var(--hairline); border-radius:50%; color:var(--gold-ink); background:var(--surface-muted); cursor:pointer; }
+  .voice-mic svg { width:21px; height:21px; }
+  .voice-mic[aria-pressed="true"] { color:#fff; background:#b83535; border-color:#b83535; box-shadow:0 0 0 4px #b8353520; }
+  .voice-mic:disabled { opacity:.5; cursor:wait; }
+  .voice-panel { border:1px solid var(--hairline); border-radius:12px; padding:14px; margin-bottom:18px; background:var(--surface-muted); }
+  .voice-panel[hidden], .voice-panel [hidden] { display:none; }
+  .voice-panel .field { margin-bottom:10px; }
+  .voice-panel textarea { min-height:92px; font-size:16px; }
+  .voice-help, .voice-status { font-size:12px; line-height:1.55; color:var(--muted-fg); margin:8px 0 12px; }
+  .voice-status { color:var(--fg); overflow-wrap:anywhere; }
+  .voice-actions { display:flex; flex-wrap:wrap; gap:8px; }
+  .voice-actions .btn { min-height:40px; padding:9px 12px; letter-spacing:.06em; font-size:10px; }
+  .voice-text-toggle { color:var(--gold-ink); font-size:11px; padding:0 0 12px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+  .voice-panel button:disabled, #saveBtn:disabled { opacity:.5; cursor:wait; }
+  .voice-mic:focus-visible, .voice-text-toggle:focus-visible { outline:2px solid var(--gold-ink); outline-offset:3px; }
   .field {
     margin-bottom: 16px;
   }
@@ -1187,10 +1203,27 @@
   <div class="handle"></div>
   <div class="sheet-head">
     <div class="title" id="editTitle">New <em>entry</em></div>
-    <button class="close" data-close>Close</button>
+    <div class="entry-head-actions">
+      <button type="button" class="voice-mic" id="voice-record" aria-label="Start voice recording" title="Start voice recording" aria-pressed="false" aria-expanded="false" aria-controls="voice-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg>
+      </button>
+      <button class="close" data-close>Close</button>
+    </div>
   </div>
   <div class="sheet-body">
     <form id="editForm" autocomplete="off">
+      <button type="button" class="voice-text-toggle" id="voice-toggle">Speak or type a hotel entry</button>
+      <section class="voice-panel" id="voice-panel" aria-label="Voice entry" hidden>
+        <p class="voice-help">Audio stays on this device. First use downloads Whisper. Tap the microphone again to stop.</p>
+        <div class="field"><label for="voice-text">Transcript or typed entry</label><textarea id="voice-text" placeholder="Aman Tokyo in Tokyo, Japan. Rating four point seven five. Notes: quiet rooms." spellcheck="true"></textarea></div>
+        <div class="voice-actions">
+          <button type="button" class="btn outline" id="voice-parse">Fill fields</button>
+          <button type="button" class="btn ghost" id="voice-undo" hidden>Undo fill</button>
+          <button type="button" class="btn ghost" id="voice-load">Prepare Whisper</button>
+          <button type="button" class="btn ghost" id="voice-cancel">Close voice</button>
+        </div>
+        <p class="voice-status" id="voice-status" role="status" aria-live="polite">Tap the microphone, speak one hotel, then tap again to stop.</p>
+      </section>
       <div class="field">
         <label>Status</label>
         <div class="seg" id="statusSeg" data-val="stayed">
@@ -1394,10 +1427,10 @@
 <script>
 /* ============================================================
  * Hotel Journal
- * Single-file iPhone web app, Luxury/Editorial.
+ * iPhone web app, Luxury/Editorial. Voice assets load only when requested.
  * ============================================================ */
 
-const VERSION = "1.6.2";
+const VERSION = "1.7.0";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1544,6 +1577,7 @@ function openSheet(sheet) {
   document.body.style.overflow = 'hidden';
 }
 function closeAllSheets() {
+  window.HotelVoice?.reset();
   discardPendingPhotos();
   scrim.classList.remove('show');
   [editSheet, detailSheet, settingsSheet, importSheet].forEach(s => {
@@ -1981,6 +2015,7 @@ $('#contactFields').addEventListener('click', e => {
 });
 
 function openEdit(id=null) {
+  window.HotelVoice?.reset();
   state.editingId = id;
   const h = id ? state.hotels.find(x => x.id === id) : null;
   $('#editTitle').innerHTML = h ? 'Edit <em>entry</em>' : 'New <em>entry</em>';
@@ -2634,5 +2669,8 @@ function init() {
 init();
 
 </script>
+<script src="voice-parser.js?v=1.7.0"></script>
+<script src="voice.js?v=1.7.0"></script>
+<script>HotelVoice.init({getHotels:()=>state.hotels});</script>
 </body>
 </html>
