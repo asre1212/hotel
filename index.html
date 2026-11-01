@@ -1216,6 +1216,10 @@
 }
 @keyframes sp-still-exit { 0% { visibility:visible; } 100% { visibility:hidden; } }
 </style>
+<link rel="stylesheet" href="assistant-inbox.css?v=1">
+<script src="assistant-inbox-core.js?v=1"></script>
+<script src="assistant-inbox.js?v=1"></script>
+<script>window.JournalInbox = AssistantInboxCore("hotel");</script>
 </head>
 <body>
 <script id="seasonal-splash-script">
@@ -1538,6 +1542,7 @@
   <div class="sheet-body">
 
     <div class="settings-section">
+      <div id="assistant-entries"></div>
       <h3>Cross-device <em>sync</em></h3>
       <p>Sync uses a private GitHub Gist. Create a Personal Access Token with the <code>gist</code> scope at <em>github.com/settings/tokens</em>, paste it below, and press <strong>Sync now</strong>. A new gist is created on first sync; afterwards, the same token on another device pulls your data down.</p>
 
@@ -1651,7 +1656,7 @@
  * iPhone web app, Luxury/Editorial. Voice assets load only when requested.
  * ============================================================ */
 
-const VERSION = "1.7.1";
+const VERSION = "1.8.0";
 document.getElementById('versionLabel').textContent = VERSION;
 
 const LS = {
@@ -1765,12 +1770,16 @@ async function compressPhoto(file) {
 
 function load(key, fallback) {
   try {
+    if (key === LS.HOTELS) return JournalInbox.readCollection(localStorage).data;
     const v = localStorage.getItem(key);
     return v == null ? fallback : JSON.parse(v);
   } catch(e) { return fallback; }
 }
 function save(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  try {
+    if (key === LS.HOTELS) JournalInbox.saveData(localStorage, val);
+    else localStorage.setItem(key, JSON.stringify(val));
+  } catch(e) { showToast('Could not save data. Export a backup and free device storage.', 'err'); }
 }
 function uid() {
   return 'h_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
@@ -2490,6 +2499,7 @@ async function pushToCloud() {
     version: VERSION,
     updated: Date.now(),
     hotels: state.hotels,
+    assistantReceipts: JournalInbox.readCollection(localStorage).receipts,
     brands: state.brands,
   }, null, 2);
 
@@ -2675,6 +2685,7 @@ function exportJson() {
     version: VERSION,
     exported: new Date().toISOString(),
     hotels: state.hotels,
+    assistantReceipts: JournalInbox.readCollection(localStorage).receipts,
     brands: state.brands,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
@@ -2706,8 +2717,8 @@ function applyImported(payload) {
     photos:  Array.isArray(h.photos) ? h.photos.filter(p => typeof p === 'string') : [],
     updated: Number(h.updated || Date.now()),
   }));
+  JournalInbox.saveData(localStorage, hotels, payload.assistantReceipts || []);
   state.hotels = hotels;
-  save(LS.HOTELS, state.hotels);
   updateAutocompleteLists();
   render();
 }
@@ -2877,6 +2888,10 @@ function init() {
   updateAutocompleteLists();
   render();
   refreshSyncBadge();
+  const inbox = AssistantInbox.create({core:JournalInbox,onSaved:hotels => {
+    state.hotels = hotels; updateAutocompleteLists(); render();
+  }});
+  inbox.mount(document.getElementById('assistant-entries'));
 
   // Silent auto update check once per session if URL configured
   const url = load(LS.RAWURL, '');
@@ -2895,4 +2910,5 @@ init();
 <script>HotelVoice.init({getHotels:()=>state.hotels});</script>
 </body>
 </html>
+
 
